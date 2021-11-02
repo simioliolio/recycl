@@ -1,3 +1,4 @@
+// An engine for playing slices of audio
 Engine_Recycl : CroneEngine {
 
 	var <gatedPlayer;
@@ -52,9 +53,9 @@ Engine_Recycl : CroneEngine {
 
 		Server.default.sync;
 
-		gatedPlayer = Synth("GatedPlayer");
+		gatedPlayer = Synth("GatedPlayer", [\out, context.out_b], context.xg);
 
-		this.addCommand("load", "s", {arg msg;
+		this.addCommand("load_audio_file", "s", {arg msg;
 			~buffer = Buffer.read(context.server, msg[1]);
 			gatedPlayer.set(\bufnum, ~buffer);
 		});

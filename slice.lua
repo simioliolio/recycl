@@ -1,4 +1,8 @@
 -- norns.script.load("code/recycl/slice.lua")
+
+engine.name = "Recycl"
+engine.list_commands()
+
 debug_mode = true
 debug_file = "/home/we/dust/audio/common/The Breaks/11thhouse.wav"
 
@@ -19,6 +23,7 @@ function load_file(file)
     length = samples / 48000 -- shouldn't hard code?
     softcut.buffer_read_mono(file,0,0,-1,1,1) -- only split mono for now?
     softcut.buffer_read_mono(file,0,0,-1,1,2) --
+    engine.load_audio_file(file)
     reset()
     waveform_loaded = true
   end
@@ -100,6 +105,10 @@ function key(n,z)
   if n==1 and z==1 then
     selecting_file = true
     fileselect.enter(_path.dust,load_file)
+  elseif n==3 and z==1 then
+    engine.play(cursor_position_time / length)
+  elseif n==3 and z==0 then
+    engine.stop()
   end
 end
 
