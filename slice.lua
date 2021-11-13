@@ -2,6 +2,7 @@
 
 engine.name = "Recycl"
 engine.list_commands()
+poll.list_names()
 
 debug_mode = true
 debug_file = "/home/we/dust/audio/common/The Breaks/11thhouse.wav"
@@ -29,6 +30,14 @@ function load_file(file)
   end
 end
 
+function register_playhead_poll()
+  playhead_poll = poll.set('playhead', function(pos)
+    playhead_position = pos
+    redraw()
+  end)
+  playhead_poll.time = 0.1
+end
+
 function reset()
   for i=1,2 do
     softcut.enable(i,1)
@@ -39,8 +48,9 @@ function reset()
     softcut.fade_time(1,0)
   end
   cursor_position_time = 0
-  waveform_render_duration = 0.5
+  waveform_render_duration = 1.5
   waveform_render_time_start = cursor_position_time - (waveform_render_duration / 2)
+  playhead_position = nil
   update_content(1, waveform_render_time_start, waveform_render_duration)
 end
 
@@ -96,6 +106,8 @@ function init()
   softcut.poll_start_phase()
   softcut.event_render(on_render)
 
+  register_playhead_poll()
+
   reset()
 
   if debug_mode then load_file(debug_file) end
@@ -107,8 +119,12 @@ function key(n,z)
     fileselect.enter(_path.dust,load_file)
   elseif n==3 and z==1 then
     engine.play(cursor_position_time / length)
+    playhead_poll:start()
   elseif n==3 and z==0 then
     engine.stop()
+    playhead_poll:stop()
+    playhead_position = nil
+    redraw()
   end
 end
 
@@ -160,6 +176,13 @@ function redraw()
     screen.move(util.linlin(waveform_render_time_start,waveform_render_time_end,10,120,cursor_position_time),18)
     screen.line_rel(0, 35)
     screen.stroke()
+  -- draw playhead
+    if (playhead_position ~= nil) and (playhead_position < waveform_render_time_end) then
+      screen.level(2)
+      screen.move(util.linlin(waveform_render_time_start, waveform_render_time_end, 10, 120, playhead_position), 0)
+      screen.line_rel(0, 64)
+      screen.stroke()
+    end
   end
   
   screen.update()
