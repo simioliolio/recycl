@@ -16,18 +16,23 @@ length = 1
 selecting_file = false
 waveform_loaded = false
 
-function load_file(file)
-  softcut.buffer_clear_region(1,-1)
-  selecting_file = false
-  if file ~= "cancel" then
-    local ch, samples = audio.file_info(file)
-    length = samples / 48000 -- shouldn't hard code?
-    softcut.buffer_read_mono(file,0,0,-1,1,1) -- only split mono for now?
-    softcut.buffer_read_mono(file,0,0,-1,1,2) --
-    engine.load_audio_file(file)
-    reset()
-    waveform_loaded = true
-  end
+-- startup
+
+function init()
+  setup_softcut()
+  register_playhead_poll()
+  reset()
+  if debug_mode then load_file(debug_file) end
+end
+
+function setup_softcut()
+  softcut.buffer_clear()
+  audio.level_adc_cut(1)
+  softcut.level_input_cut(1,2,1.0)
+  softcut.level_input_cut(2,2,1.0)
+  softcut.phase_quant(1,0.01)
+  softcut.poll_start_phase()
+  softcut.event_render(on_render)
 end
 
 function register_playhead_poll()
@@ -54,7 +59,28 @@ function reset()
   update_content(1, waveform_render_time_start, waveform_render_duration)
 end
 
--- WAVEFORMS
+--/ startup
+
+-- file loading
+
+function load_file(file)
+  softcut.buffer_clear_region(1,-1)
+  selecting_file = false
+  if file ~= "cancel" then
+    local ch, samples = audio.file_info(file)
+    length = samples / 48000 -- shouldn't hard code?
+    softcut.buffer_read_mono(file,0,0,-1,1,1) -- only split mono for now?
+    softcut.buffer_read_mono(file,0,0,-1,1,2) --
+    engine.load_audio_file(file)
+    reset()
+    waveform_loaded = true
+  end
+end
+
+--/ file loading
+
+-- waveform display
+
 local interval = 0
 waveform_render_width = 128
 waveform_samples = {}
@@ -64,14 +90,16 @@ cursor_position_time = 0
 scale = 30
 minimum_render_duration = waveform_render_width / 48000 -- shouldn't hard code?
 
+-- softcut render event callback
 function on_render(ch, start, i, s)
   interval = i
   if waveform_render_time_start >= 0.0 then
     waveform_samples = s
   else
-    -- waveform render sometimes shows data before the first sample, as cursor is 
-    -- in the middle. softcut will not render a buffer if start time is negative.
-    -- so, add an appropriate number of zeros to the start of waveform_samples
+    -- waveform render sometimes shows data before the first sample, as cursor is
+    -- shown in the middle of the display. softcut will not render a buffer if
+    -- start time is negative. so, add an appropriate number of zeros to the start
+    -- of waveform_samples table
     local offset_samples = {}
     local time_when_before_zero = waveform_render_time_start
     local rendered_waveform_index = 1
@@ -90,28 +118,14 @@ function on_render(ch, start, i, s)
   redraw()
 end
 
+-- trigger render event
 function update_content(buffer,winstart,duration)
   softcut.render_buffer(buffer, util.clamp(winstart, 0.0, length), duration, waveform_render_width)
 end
---/ WAVEFORMS
 
-function init()
-  softcut.buffer_clear()
-  
-  audio.level_adc_cut(1)
-  softcut.level_input_cut(1,2,1.0)
-  softcut.level_input_cut(2,2,1.0)
+--/ waveform display
 
-  softcut.phase_quant(1,0.01)
-  softcut.poll_start_phase()
-  softcut.event_render(on_render)
-
-  register_playhead_poll()
-
-  reset()
-
-  if debug_mode then load_file(debug_file) end
-end
+-- user input
 
 function key(n,z)
   if n==1 and z==1 then
@@ -148,6 +162,10 @@ function enc(n,d)
     update_content(1, waveform_render_time_start, waveform_render_duration)
   end
 end
+
+--/ user input
+
+-- screen drawing
 
 function redraw()
   screen.clear()
@@ -187,3 +205,5 @@ function redraw()
   
   screen.update()
 end
+
+--/ screen drawing
