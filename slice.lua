@@ -19,6 +19,9 @@ waveform_loaded = false
 include("waveformdisplay")
 waveformDisplay = WaveformDisplay:new()
 
+include("model")
+model = Model:new()
+
 -- startup
 
 function init()
@@ -60,6 +63,8 @@ function reset()
     {updateDataRequest = update_content,
     maximum_render_duration = length}
   )
+  model = Model:new()
+  model.sliceStore:setLength(length)
   playhead_position = nil
   -- trigger intial waveform load
   update_content(waveformDisplay.waveform_render_time_start, waveformDisplay.waveform_render_duration)
@@ -108,6 +113,9 @@ function key(n,z)
   if n==1 and z==1 then
     selecting_file = true
     fileselect.enter(_path.dust,load_file)
+  elseif n==2 and z==1 then
+    model.sliceStore:addSlice(cursor_position_time)
+    redraw()
   elseif n==3 and z==1 then
     engine.play(cursor_position_time / length)
     playhead_poll:start()
@@ -150,27 +158,36 @@ function redraw()
   -- draw waveform
     screen.level(4)
     local x_pos = 0
-    local zero_count = 0
-    local non_zero_count = 0
     for i,s in ipairs(waveformDisplay.waveform_samples) do
       local height = util.round(math.abs(s) * (scale*level))
-      if height <= 0 then zero_count = zero_count + 1 else non_zero_count = non_zero_count + 1 end
       screen.move(util.linlin(0,waveformDisplay.waveform_render_width,10,120,x_pos), 35 - height)
       screen.line_rel(0, 2 * height)
       screen.stroke()
       x_pos = x_pos + 1
     end
   -- draw cursor position
+    local startTime = waveformDisplay.waveform_render_time_start
+    local endTime = startTime + waveformDisplay.waveform_render_duration
     screen.level(15)
-    local waveform_render_time_end = waveformDisplay.waveform_render_time_start + waveformDisplay.waveform_render_duration
-    screen.move(util.linlin(waveformDisplay.waveform_render_time_start,waveform_render_time_end,10,120,cursor_position_time),18)
+    screen.move(util.linlin(startTime,endTime,10,120,cursor_position_time),18)
     screen.line_rel(0, 35)
     screen.stroke()
   -- draw playhead
-    if (playhead_position ~= nil) and (playhead_position < waveform_render_time_end) then
+    if (playhead_position ~= nil) and (playhead_position < endTime) then
       screen.level(2)
-      screen.move(util.linlin(waveformDisplay.waveform_render_time_start, waveform_render_time_end, 10, 120, playhead_position), 0)
+      screen.move(util.linlin(startTime, endTime, 10, 120, playhead_position), 0)
       screen.line_rel(0, 64)
+      screen.stroke()
+    end
+  -- draw slice times
+    local sliceTimesToDisplay = model.sliceStore:slicesInRange(startTime, endTime)
+    for i, sliceTime in ipairs(sliceTimesToDisplay) do
+      screen.level(5)
+      local sliceXPos = util.linlin(startTime, endTime, 10, 120, sliceTime)
+      screen.move(sliceXPos, 4)
+      screen.line_rel(0, 60)
+      screen.stroke()
+      screen.circle(sliceXPos, 4, 2)
       screen.stroke()
     end
   end
