@@ -17,7 +17,7 @@ selecting_file = false
 waveform_loaded = false
 
 include("waveformdisplay")
-waveformDisplay = WaveformDisplay:new()
+waveform_display = WaveformDisplay:new()
 
 include("model")
 model = Model:new()
@@ -59,15 +59,15 @@ function reset()
     softcut.fade_time(1,0)
   end
   cursor_position_time = 0
-  waveformDisplay = WaveformDisplay:new(
-    {updateDataRequest = update_content,
+  waveform_display = WaveformDisplay:new(
+    {update_data_request = update_content,
     maximum_render_duration = length}
   )
   model = Model:new()
-  model.sliceStore:setLength(length)
+  model.slice_store:set_length(length)
   playhead_position = nil
   -- trigger intial waveform load
-  update_content(waveformDisplay.waveform_render_time_start, waveformDisplay.waveform_render_duration)
+  update_content(waveform_display.waveform_render_time_start, waveform_display.waveform_render_duration)
 end
 
 --/ startup
@@ -96,13 +96,13 @@ scale = 30 -- TODO: Rename
 
 -- softcut render event callback
 function on_render(ch, start, i, s)
-  waveformDisplay:setWaveformData(i, s)
+  waveform_display:set_waveform_data(i, s)
   redraw()
 end
 
 -- trigger render event
 function update_content(winstart,duration)
-  softcut.render_buffer(1, util.clamp(winstart, 0.0, length), duration, waveformDisplay.waveform_render_width)
+  softcut.render_buffer(1, util.clamp(winstart, 0.0, length), duration, waveform_display.waveform_render_width)
 end
 
 --/ waveform view
@@ -114,7 +114,7 @@ function key(n,z)
     selecting_file = true
     fileselect.enter(_path.dust,load_file)
   elseif n==2 and z==1 then
-    model.sliceStore:addSlice(cursor_position_time)
+    model.slice_store:add_slice(cursor_position_time)
     redraw()
   elseif n==3 and z==1 then
     engine.play(cursor_position_time / length)
@@ -129,17 +129,17 @@ end
 
 function enc(n,d)
   if n==1 then
-    waveformDisplay:zoom(d)
+    waveform_display:zoom(d)
   elseif n==2 then
   -- move cursor
-    local jump = waveformDisplay.waveform_render_duration / waveformDisplay.waveform_render_width -- jump approx 1 pixel
+    local jump = waveform_display.waveform_render_duration / waveform_display.waveform_render_width -- jump approx 1 pixel
     local cursor_offset = jump * d -- neg or pos offset depending on enc turn direction
     cursor_position_time = util.clamp(cursor_position_time + cursor_offset, 0.0, length)
     -- adjust start so cursor is always in the center of waveform render
     -- TODO: Could move this to waveform?
-    waveformDisplay.waveform_render_time_start = cursor_position_time - (waveformDisplay.waveform_render_duration / 2)
-    waveformDisplay.cursor_position_time = cursor_position_time
-    update_content(waveformDisplay.waveform_render_time_start, waveformDisplay.waveform_render_duration)
+    waveform_display.waveform_render_time_start = cursor_position_time - (waveform_display.waveform_render_duration / 2)
+    waveform_display.cursor_position_time = cursor_position_time
+    update_content(waveform_display.waveform_render_time_start, waveform_display.waveform_render_duration)
   end
 end
 
@@ -158,36 +158,36 @@ function redraw()
   -- draw waveform
     screen.level(4)
     local x_pos = 0
-    for i,s in ipairs(waveformDisplay.waveform_samples) do
+    for i,s in ipairs(waveform_display.waveform_samples) do
       local height = util.round(math.abs(s) * (scale*level))
-      screen.move(util.linlin(0,waveformDisplay.waveform_render_width,10,120,x_pos), 35 - height)
+      screen.move(util.linlin(0,waveform_display.waveform_render_width,10,120,x_pos), 35 - height)
       screen.line_rel(0, 2 * height)
       screen.stroke()
       x_pos = x_pos + 1
     end
   -- draw cursor position
-    local startTime = waveformDisplay.waveform_render_time_start
-    local endTime = startTime + waveformDisplay.waveform_render_duration
+    local start_time = waveform_display.waveform_render_time_start
+    local end_time = start_time + waveform_display.waveform_render_duration
     screen.level(15)
-    screen.move(util.linlin(startTime,endTime,10,120,cursor_position_time),18)
+    screen.move(util.linlin(start_time,end_time,10,120,cursor_position_time),18)
     screen.line_rel(0, 35)
     screen.stroke()
   -- draw playhead
-    if (playhead_position ~= nil) and (playhead_position < endTime) then
+    if (playhead_position ~= nil) and (playhead_position < end_time) then
       screen.level(2)
-      screen.move(util.linlin(startTime, endTime, 10, 120, playhead_position), 0)
+      screen.move(util.linlin(start_time, end_time, 10, 120, playhead_position), 0)
       screen.line_rel(0, 64)
       screen.stroke()
     end
   -- draw slice times
-    local sliceTimesToDisplay = model.sliceStore:slicesInRange(startTime, endTime)
-    for i, sliceTime in ipairs(sliceTimesToDisplay) do
+    local slice_times_to_display = model.slice_store:slices_in_range(start_time, end_time)
+    for i, sliceTime in ipairs(slice_times_to_display) do
       screen.level(5)
-      local sliceXPos = util.linlin(startTime, endTime, 10, 120, sliceTime)
-      screen.move(sliceXPos, 4)
+      local slice_x_pos = util.linlin(start_time, end_time, 10, 120, sliceTime)
+      screen.move(slice_x_pos, 4)
       screen.line_rel(0, 60)
       screen.stroke()
-      screen.circle(sliceXPos, 4, 2)
+      screen.circle(slice_x_pos, 4, 2)
       screen.stroke()
     end
   end

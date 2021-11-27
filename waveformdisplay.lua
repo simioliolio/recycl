@@ -8,7 +8,7 @@ WaveformDisplay = {
     minimum_render_duration = 128 / 48000, -- TODO: don't hard code sample rate
     maximum_render_duration = 1,    -- Should set when file length is known
     cursor_position_time = 0,       -- Should set when cursor moves
-    updateDataRequest = function(start, duration) end -- TODO: Remove?
+    update_data_request = function(start, duration) end -- TODO: Remove?
 }
 
 function WaveformDisplay:new(o)
@@ -18,12 +18,12 @@ function WaveformDisplay:new(o)
     return o
 end
 
-function WaveformDisplay:update() -- TODO: Remove?
-    self.updateDataRequest(self.waveform_render_time_start, self.waveform_render_duration)
+function WaveformDisplay:update()
+    self.update_data_request(self.waveform_render_time_start, self.waveform_render_duration)
 end
 
 -- Set waveform data recently requested
-function WaveformDisplay:setWaveformData(interval, data)
+function WaveformDisplay:set_waveform_data(interval, data)
     if self.waveform_render_time_start >= 0.0 then
         self.waveform_samples = data
     else
@@ -55,7 +55,7 @@ function WaveformDisplay:zoom(d)
     end
     self.waveform_render_duration = util.clamp(self.waveform_render_duration * change_scalar, self.minimum_render_duration, self.maximum_render_duration)
     self.waveform_render_time_start = self.cursor_position_time - (self.waveform_render_duration / 2)
-    self.updateDataRequest(self.waveform_render_time_start, self.waveform_render_duration)
+    self.update_data_request(self.waveform_render_time_start, self.waveform_render_duration)
 end
 
 return WaveformDisplay

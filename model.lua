@@ -3,7 +3,7 @@ SliceStore = {
     length = 1.0,
 
     -- add slice start points here
-    sliceTimes = {0.0, 1.0} 
+    slice_times = {0.0, 1.0}
 }
 
 function SliceStore:new(o)
@@ -14,51 +14,51 @@ function SliceStore:new(o)
 end
 
 -- note; will erase all existing slice times, so best to do this early
-function SliceStore:setLength(length)
+function SliceStore:set_length(length)
     self.length = length
-    self.sliceTimes = {0.0, length}
+    self.slice_times = {0.0, length}
 end
 
-function SliceStore:addSlice(intendedSliceStart)
-    if #self.sliceTimes < 2 then 
-        print("not adding slice. sliceTimes should have at least two slices on init")
+function SliceStore:add_slice(intended_slice_start)
+    if #self.slice_times < 2 then
+        print("not adding slice. slice_times should have at least two slices on init")
         return
     end
 
-    if intendedSliceStart >= self.length then
+    if intended_slice_start >= self.length then
         print("slice not added, goes beyond length")
         return
     end
 
-    local newSliceTimes = {}
+    local new_slice_times = {}
 
-    for index = 1, #self.sliceTimes - 1 do
-        indexSliceTime = self.sliceTimes[index]
-        table.insert(newSliceTimes, indexSliceTime)
+    for index = 1, #self.slice_times - 1 do
+        local index_slice_time = self.slice_times[index]
+        table.insert(new_slice_times, index_slice_time)
 
-        nextIndexSliceTime = self.sliceTimes[index + 1]
+        local next_index_slice_time = self.slice_times[index + 1]
 
         -- note; the lack of 'equal to' below prevents duplication
-        if indexSliceTime < intendedSliceStart and 
-        intendedSliceStart < nextIndexSliceTime then
-            table.insert(newSliceTimes, intendedSliceStart)
+        if index_slice_time < intended_slice_start and
+        intended_slice_start < next_index_slice_time then
+            table.insert(new_slice_times, intended_slice_start)
         end
     end
 
     -- add last (not in for loop)
-    table.insert(newSliceTimes, self.sliceTimes[#self.sliceTimes])
+    table.insert(new_slice_times, self.slice_times[#self.slice_times])
 
-    self.sliceTimes = newSliceTimes
+    self.slice_times = new_slice_times
 end
 
-function SliceStore:slicesInRange(startTime, endTime)
-    slicesInRange = {}
-    for i, sliceTime in ipairs(self.sliceTimes) do
-        if startTime <= sliceTime and sliceTime <= endTime then
-            table.insert(slicesInRange, sliceTime)
+function SliceStore:slices_in_range(start_time, end_time)
+    slices_in_range = {}
+    for i, slice_time in ipairs(self.slice_times) do
+        if start_time <= slice_time and slice_time <= end_time then
+            table.insert(slices_in_range, slice_time)
         end
     end
-    return slicesInRange
+    return slices_in_range
 end
 
 Model = {}
@@ -67,7 +67,7 @@ function Model:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
-    self.sliceStore = SliceStore:new()
+    self.slice_store = SliceStore:new()
     return o
 end
 
