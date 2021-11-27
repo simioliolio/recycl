@@ -61,13 +61,13 @@ function reset()
   cursor_position_time = 0
   waveform_display = WaveformDisplay:new(
     {update_data_request = update_content,
-    maximum_render_duration = length}
+    max_render_duration = length}
   )
   model = Model:new()
   model.slice_store:set_length(length)
   playhead_position = nil
   -- trigger intial waveform load
-  update_content(waveform_display.waveform_render_time_start, waveform_display.waveform_render_duration)
+  update_content(waveform_display.render_time_start, waveform_display.render_duration)
 end
 
 --/ startup
@@ -102,7 +102,7 @@ end
 
 -- trigger render event
 function update_content(winstart,duration)
-  softcut.render_buffer(1, util.clamp(winstart, 0.0, length), duration, waveform_display.waveform_render_width)
+  softcut.render_buffer(1, util.clamp(winstart, 0.0, length), duration, waveform_display.render_width)
 end
 
 --/ waveform view
@@ -132,14 +132,14 @@ function enc(n,d)
     waveform_display:zoom(d)
   elseif n==2 then
   -- move cursor
-    local jump = waveform_display.waveform_render_duration / waveform_display.waveform_render_width -- jump approx 1 pixel
+    local jump = waveform_display.render_duration / waveform_display.render_width -- jump approx 1 pixel
     local cursor_offset = jump * d -- neg or pos offset depending on enc turn direction
     cursor_position_time = util.clamp(cursor_position_time + cursor_offset, 0.0, length)
     -- adjust start so cursor is always in the center of waveform render
     -- TODO: Could move this to waveform?
-    waveform_display.waveform_render_time_start = cursor_position_time - (waveform_display.waveform_render_duration / 2)
+    waveform_display.render_time_start = cursor_position_time - (waveform_display.render_duration / 2)
     waveform_display.cursor_position_time = cursor_position_time
-    update_content(waveform_display.waveform_render_time_start, waveform_display.waveform_render_duration)
+    update_content(waveform_display.render_time_start, waveform_display.render_duration)
   end
 end
 
@@ -158,16 +158,16 @@ function redraw()
   -- draw waveform
     screen.level(4)
     local x_pos = 0
-    for i,s in ipairs(waveform_display.waveform_samples) do
+    for i,s in ipairs(waveform_display.samples) do
       local height = util.round(math.abs(s) * (scale*level))
-      screen.move(util.linlin(0,waveform_display.waveform_render_width,10,120,x_pos), 35 - height)
+      screen.move(util.linlin(0,waveform_display.render_width,10,120,x_pos), 35 - height)
       screen.line_rel(0, 2 * height)
       screen.stroke()
       x_pos = x_pos + 1
     end
   -- draw cursor position
-    local start_time = waveform_display.waveform_render_time_start
-    local end_time = start_time + waveform_display.waveform_render_duration
+    local start_time = waveform_display.render_time_start
+    local end_time = start_time + waveform_display.render_duration
     screen.level(15)
     screen.move(util.linlin(start_time,end_time,10,120,cursor_position_time),18)
     screen.line_rel(0, 35)
