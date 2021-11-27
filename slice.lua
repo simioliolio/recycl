@@ -135,11 +135,7 @@ function enc(n,d)
     local jump = waveform_display.render_duration / waveform_display.render_width -- jump approx 1 pixel
     local cursor_offset = jump * d -- neg or pos offset depending on enc turn direction
     cursor_position_time = util.clamp(cursor_position_time + cursor_offset, 0.0, length)
-    -- adjust start so cursor is always in the center of waveform render
-    -- TODO: Could move this to waveform?
-    waveform_display.render_time_start = cursor_position_time - (waveform_display.render_duration / 2)
-    waveform_display.cursor_position_time = cursor_position_time
-    update_content(waveform_display.render_time_start, waveform_display.render_duration)
+    waveform_display:set_center_and_update(cursor_position_time)
   end
 end
 
@@ -191,7 +187,7 @@ function redraw()
       screen.stroke()
     end
   end
-  
+
   screen.update()
 end
 
