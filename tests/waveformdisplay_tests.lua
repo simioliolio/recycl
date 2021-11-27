@@ -7,6 +7,7 @@ TestWaveformDisplay = {}
 
 function TestWaveformDisplay:testSetWaveformData_whenStartTimeGreaterThanZero_thenSaveUnmodified()
     waveform = WaveformDisplay:new()
+    waveform.waveform_render_time_start = 0.1
     dataStub = { 0.0, 0.1, 0.5, 1.0 }
     waveform:setWaveformData(0.2, dataStub)
     luaunit.assertEquals(waveform.waveform_samples, dataStub)
@@ -30,8 +31,8 @@ function TestWaveformDisplay:testUpdate_thenCallsUpdateDataRequest() -- TODO: Re
     end
     waveform = WaveformDisplay:new{updateDataRequest = updateFunction}
     waveform:update()
-    luaunit.assertEquals(updateFunctionCalledWithStart, 0)
-    luaunit.assertEquals(updateFunctionCalledWithDuration, 1)
+    luaunit.assertEquals(updateFunctionCalledWithStart, -0.75)  -- Assert default values
+    luaunit.assertEquals(updateFunctionCalledWithDuration, 1.5) --
 end
 
 function TestWaveformDisplay:testZoom_whenZoomOut_thenLargerDuration_thenEarlierStartTime()
