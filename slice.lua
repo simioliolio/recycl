@@ -98,6 +98,7 @@ end
 -- waveform view
 cursor_position_time = 0
 selected_slice_index = 1
+no_slice_selected = true
 scale = 30 -- TODO: Rename
 
 -- softcut render event callback
@@ -122,10 +123,11 @@ function key(n,z)
   elseif n==2 and z==1 then
     if mode == Mode.SLICE_SET then
       model.slice_store:add_slice(cursor_position_time)
+      selected_slice_index = model.slice_store:closest_slice_index(cursor_position_time)
       redraw()
     elseif mode == Mode.SLICE_REVIEW then
       model.slice_store:remove_slice(selected_slice_index)
-      selected_slice_index = util.clamp(selected_slice_index - 1, 1, #model.slice_store.slice_times)
+      no_slice_selected = true
       redraw()
     end
 
@@ -149,12 +151,19 @@ function enc(n,d)
     local jump = waveform_display.render_duration / waveform_display.render_width -- jump approx 1 pixel
     local cursor_offset = jump * d -- neg or pos offset depending on enc turn direction
     cursor_position_time = util.clamp(cursor_position_time + cursor_offset, 0.0, length)
+    no_slice_selected = true
     waveform_display:set_center_and_update(cursor_position_time)
   elseif n==3 then
-  -- select slices
+    -- move cursor to a slice
+    if no_slice_selected then
+      -- FIXME: use d to either get 'first_slice_after_(time)' or 'first_slice_before_(time)' and remove 'closest...' if not in use
+      selected_slice_index = model.slice_store:closest_slice_index(cursor_position_time)
+      no_slice_selected = false
+    else
+      local current_number_of_slice_times = #model.slice_store.slice_times
+      selected_slice_index = util.clamp(selected_slice_index + d, 1, current_number_of_slice_times)
+    end
     mode = Mode.SLICE_REVIEW
-    local current_number_of_slice_times = #model.slice_store.slice_times
-    selected_slice_index = util.clamp(selected_slice_index + d, 1, current_number_of_slice_times)
     cursor_position_time = model.slice_store.slice_times[selected_slice_index]
     waveform_display:set_center_and_update(cursor_position_time)
   end
