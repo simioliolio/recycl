@@ -35,6 +35,21 @@ function TestModel:test_slicesStore_whenAddSliceBeyondLength_thenNoChange()
     luaunit.assertEquals(#model.slice_store.slice_times, 2)
 end
 
+function TestModel:test_sliceStore_whenRemoveMiddleSlice_thenRemovesSlice()
+    local model = Model:new()
+    model.slice_store.slice_times = {0.0, 0.5, 1.0}
+    model.slice_store:remove_slice(2)
+    luaunit.assertEquals(model.slice_store.slice_times, {0.0, 1.0})
+end
+
+function TestModel:test_sliceStore_whenRemoveSlice_thenDoesNotRemoveFirstOrLast()
+    local model = Model:new()
+    model.slice_store.slice_times = {0.0, 0.5, 1.0}
+    model.slice_store:remove_slice(1)
+    model.slice_store:remove_slice(3)
+    luaunit.assertEquals(model.slice_store.slice_times, {0.0, 0.5, 1.0})
+end
+
 function TestModel:test_slicesStore_whenAddDuplicateSlices_thenNoChange()
     local model = Model:new()
     luaunit.assertEquals(#model.slice_store.slice_times, 2)

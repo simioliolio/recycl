@@ -51,6 +51,14 @@ function SliceStore:add_slice(intended_slice_start)
     self.slice_times = new_slice_times
 end
 
+function SliceStore:remove_slice(index)
+    if 1 >= index or index >= #self.slice_times then
+        print("cannot remove start or end slice")
+        return
+    end
+    table.remove(self.slice_times, index)
+end
+
 function SliceStore:slices_in_range(start_time, end_time)
     slices_in_range = {}
     for i, slice_time in ipairs(self.slice_times) do

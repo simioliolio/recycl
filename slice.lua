@@ -124,7 +124,9 @@ function key(n,z)
       model.slice_store:add_slice(cursor_position_time)
       redraw()
     elseif mode == Mode.SLICE_REVIEW then
-      -- TODO: Remove slice
+      model.slice_store:remove_slice(selected_slice_index)
+      selected_slice_index = util.clamp(selected_slice_index - 1, 1, #model.slice_store.slice_times)
+      redraw()
     end
 
   elseif n==3 and z==1 then
