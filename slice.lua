@@ -92,6 +92,7 @@ end
 
 -- waveform view
 cursor_position_time = 0
+selected_slice_index = 1
 scale = 30 -- TODO: Rename
 
 -- softcut render event callback
@@ -135,6 +136,12 @@ function enc(n,d)
     local jump = waveform_display.render_duration / waveform_display.render_width -- jump approx 1 pixel
     local cursor_offset = jump * d -- neg or pos offset depending on enc turn direction
     cursor_position_time = util.clamp(cursor_position_time + cursor_offset, 0.0, length)
+    waveform_display:set_center_and_update(cursor_position_time)
+  elseif n==3 then
+  -- select slices
+    local current_number_of_slice_times = #model.slice_store.slice_times
+    selected_slice_index = util.clamp(selected_slice_index + d, 1, current_number_of_slice_times)
+    cursor_position_time = model.slice_store.slice_times[selected_slice_index]
     waveform_display:set_center_and_update(cursor_position_time)
   end
 end
