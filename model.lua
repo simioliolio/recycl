@@ -69,6 +69,18 @@ function SliceStore:slices_in_range(start_time, end_time)
     return slices_in_range
 end
 
+function SliceStore:closest_slice_index(time)
+    local output_index = 1
+    local min_diff = time -- start diff is always input, as start slice is always 0.0
+    for i, slice_time in ipairs(self.slice_times) do
+        local new_diff = math.abs(time - slice_time)
+        if new_diff < min_diff then
+            output_index, min_diff = i, new_diff
+        end
+    end
+    return output_index
+end
+
 Model = {}
 
 function Model:new(o)

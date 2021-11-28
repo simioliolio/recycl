@@ -68,4 +68,25 @@ function TestModel:test_slicesStore_whenSlicesInRange_thenReturnsSlicesInRange()
     luaunit.assertEquals(slices_in_range, {1.0})
 end
 
+function TestModel:test_sliceStore_whenClosestSliceIndex_thenReturnsClosestSlice()
+    local model = Model:new()
+    model.slice_store.slice_times = {0.0, 0.5, 1.0}
+    local closest_slice = model.slice_store:closest_slice_index(0.4)
+    luaunit.assertEquals(closest_slice, 2)
+end
+
+function TestModel:test_sliceStore_whenClosestSliceIndexStart_thenReturnsClosestSlice()
+    local model = Model:new()
+    model.slice_store.slice_times = {0.0, 0.5, 1.0}
+    local closest_slice = model.slice_store:closest_slice_index(0.0)
+    luaunit.assertEquals(closest_slice, 1)
+end
+
+function TestModel:test_sliceStore_whenClosestSliceIndexEnd_thenReturnsClosestSlice()
+    local model = Model:new()
+    model.slice_store.slice_times = {0.0, 0.5, 1.0}
+    local closest_slice = model.slice_store:closest_slice_index(1.0)
+    luaunit.assertEquals(closest_slice, 3)
+end
+
 os.exit( luaunit.LuaUnit.run() )
