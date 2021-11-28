@@ -15,6 +15,11 @@ level = 1.0
 length = 1
 selecting_file = false
 waveform_loaded = false
+local Mode = {
+  SLICE_SET = 1,
+  SLICE_REVIEW = 2
+}
+mode = Mode.SLICE_SET
 
 include("waveformdisplay")
 waveform_display = WaveformDisplay:new()
@@ -115,8 +120,13 @@ function key(n,z)
     selecting_file = true
     fileselect.enter(_path.dust,load_file)
   elseif n==2 and z==1 then
-    model.slice_store:add_slice(cursor_position_time)
-    redraw()
+    if mode == Mode.SLICE_SET then
+      model.slice_store:add_slice(cursor_position_time)
+      redraw()
+    elseif mode == Mode.SLICE_REVIEW then
+      -- TODO: Remove slice
+    end
+
   elseif n==3 and z==1 then
     engine.play(cursor_position_time / length)
     playhead_poll:start()
@@ -132,13 +142,15 @@ function enc(n,d)
   if n==1 then
     waveform_display:zoom(d)
   elseif n==2 then
-  -- move cursor
+  -- move cursor along waveform
+    mode = Mode.SLICE_SET
     local jump = waveform_display.render_duration / waveform_display.render_width -- jump approx 1 pixel
     local cursor_offset = jump * d -- neg or pos offset depending on enc turn direction
     cursor_position_time = util.clamp(cursor_position_time + cursor_offset, 0.0, length)
     waveform_display:set_center_and_update(cursor_position_time)
   elseif n==3 then
   -- select slices
+    mode = Mode.SLICE_REVIEW
     local current_number_of_slice_times = #model.slice_store.slice_times
     selected_slice_index = util.clamp(selected_slice_index + d, 1, current_number_of_slice_times)
     cursor_position_time = model.slice_store.slice_times[selected_slice_index]
@@ -192,6 +204,15 @@ function redraw()
       screen.stroke()
       screen.circle(slice_x_pos, 4, 2)
       screen.stroke()
+    end
+  -- draw text
+    if mode == Mode.SLICE_SET then
+      screen.move(0, 64)
+      screen.text("+")
+
+    elseif mode == Mode.SLICE_REVIEW then
+      screen.move(0, 64)
+      screen.text("-")
     end
   end
 
