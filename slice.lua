@@ -217,14 +217,18 @@ function redraw()
       screen.stroke()
     end
   -- draw text
+    local play_text = "K3: play"
+    local play_text_width, play_text_height = screen.text_extents(play_text)
+    screen.move(120 - play_text_width, 64 - play_text_height)
+    screen.text(play_text)
     if mode == Mode.SLICE_SET then
-      screen.move(0, 64)
-      screen.text("+")
-
+      screen.move(0, 64 - play_text_height)
+      screen.text("K2: add")
     elseif mode == Mode.SLICE_REVIEW then
-      screen.move(0, 64)
-      screen.text("-")
+      screen.move(0, 64 - play_text_height)
+      screen.text("K2: del")
     end
+
   end
 
   screen.update()
