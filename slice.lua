@@ -219,14 +219,18 @@ function redraw()
   -- draw text
     local play_text = "K3: play"
     local play_text_width, play_text_height = screen.text_extents(play_text)
-    screen.move(120 - play_text_width, 64 - play_text_height)
+    screen.move(120 - play_text_width, 64)
     screen.text(play_text)
     if mode == Mode.SLICE_SET then
-      screen.move(0, 64 - play_text_height)
+      screen.move(0, 64)
       screen.text("K2: add")
+      screen.move(0, 0 + play_text_height)
+      screen.text(string.format("%.2f", cursor_position_time))
     elseif mode == Mode.SLICE_REVIEW then
-      screen.move(0, 64 - play_text_height)
+      screen.move(0, 64)
       screen.text("K2: del")
+      screen.move(0, 0 + play_text_height)
+      screen.text(selected_slice_index .. "/" .. #model.slice_store.slice_times)
     end
 
   end
