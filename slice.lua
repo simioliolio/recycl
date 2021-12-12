@@ -23,32 +23,32 @@ SlicePage = {
   scale = 30, -- TODO: Rename
 }
 
-function SlicePage.init()
-  SlicePage.setup_softcut()
-  SlicePage.register_playhead_poll()
-  SlicePage.reset()
-  if SlicePage.debug_mode then SlicePage.load_file(SlicePage.debug_file) end
+function SlicePage:init()
+  self:setup_softcut()
+  self:register_playhead_poll()
+  self:reset()
+  if self.debug_mode then self:load_file(self.debug_file) end
 end
 
-function SlicePage.setup_softcut()
+function SlicePage:setup_softcut()
   softcut.buffer_clear()
   audio.level_adc_cut(1)
   softcut.level_input_cut(1,2,1.0)
   softcut.level_input_cut(2,2,1.0)
   softcut.phase_quant(1,0.01)
   softcut.poll_start_phase()
-  softcut.event_render(SlicePage.on_render)
+  softcut.event_render(self.on_render)
 end
 
-function SlicePage.register_playhead_poll()
-  SlicePage.playhead_poll = poll.set('playhead', function(pos)
-    SlicePage.playhead_position = pos
-    SlicePage.redraw()
+function SlicePage:register_playhead_poll()
+  self.playhead_poll = poll.set('playhead', function(pos)
+    self.playhead_position = pos
+    self:redraw()
   end)
-  SlicePage.playhead_poll.time = 0.1
+  self.playhead_poll.time = 0.1
 end
 
-function SlicePage.reset()
+function SlicePage:reset()
   for i=1,2 do
     softcut.enable(i,1)
     softcut.buffer(i,i)
@@ -57,33 +57,33 @@ function SlicePage.reset()
     softcut.rate(i,1.0)
     softcut.fade_time(1,0)
   end
-  SlicePage.cursor_position_time = 0
-  SlicePage.waveform_display = WaveformDisplay:new(
-    {update_data_request = SlicePage.update_content,
-    max_render_duration = SlicePage.length}
+  self.cursor_position_time = 0
+  self.waveform_display = WaveformDisplay:new(
+    {update_data_request = self.update_content,
+    max_render_duration = self.length}
   )
-  SlicePage.model = Model:new()
-  SlicePage.model.slice_store:set_length(SlicePage.length)
-  SlicePage.playhead_position = nil
+  self.model = Model:new()
+  self.model.slice_store:set_length(self.length)
+  self.playhead_position = nil
   -- trigger intial waveform load
-  SlicePage.update_content(SlicePage.waveform_display.render_time_start, SlicePage.waveform_display.render_duration)
+  self.update_content(self.waveform_display.render_time_start, self.waveform_display.render_duration)
 end
 
   --/ startup
 
   -- file loading
 
-function SlicePage.load_file(file)
+function SlicePage:load_file(file)
   softcut.buffer_clear_region(1,-1)
-  SlicePage.selecting_file = false
+  self.selecting_file = false
   if file ~= "cancel" then
     local ch, samples = audio.file_info(file)
-    SlicePage.length = samples / 48000 -- shouldn't hard code?
+    self.length = samples / 48000 -- shouldn't hard code?
     softcut.buffer_read_mono(file,0,0,-1,1,1) -- only split mono for now?
     softcut.buffer_read_mono(file,0,0,-1,1,2) --
     engine.load_audio_file(file)
-    SlicePage.reset()
-    SlicePage.waveform_loaded = true
+    self:reset()
+    self.waveform_loaded = true
   end
 end
 
@@ -91,12 +91,14 @@ end
 
 
 -- softcut render event callback
+-- FIXME: Is there a way of using `:` / `self` here?
 function SlicePage.on_render(ch, start, i, s)
   SlicePage.waveform_display:set_waveform_data(i, s)
-  SlicePage.redraw()
+  SlicePage:redraw()
 end
 
 -- trigger render event
+-- FIXME: Is there a way of using `:` / `self` here?
 function SlicePage.update_content(winstart,duration)
   softcut.render_buffer(1, util.clamp(winstart, 0.0, SlicePage.length), duration, SlicePage.waveform_display.render_width)
 end
@@ -105,53 +107,53 @@ end
 
 -- user input
 
-function SlicePage.key(n,z)
+function SlicePage:key(n,z)
   if n==2 and z==1 then
-    if SlicePage.mode == SlicePageMode.SLICE_SET then
-      SlicePage.model.slice_store:add_slice(SlicePage.cursor_position_time)
-      SlicePage.selected_slice_index = SlicePage.model.slice_store:closest_slice_index(SlicePage.cursor_position_time)
-      SlicePage.redraw()
-    elseif SlicePage.mode == SlicePageMode.SLICE_REVIEW then
-      SlicePage.model.slice_store:remove_slice(SlicePage.selected_slice_index)
-      SlicePage.no_slice_selected = true
-      SlicePage.redraw()
+    if self.mode == SlicePageMode.SLICE_SET then
+      self.model.slice_store:add_slice(self.cursor_position_time)
+      self.selected_slice_index = self.model.slice_store:closest_slice_index(self.cursor_position_time)
+      self:redraw()
+    elseif self.mode == SlicePageMode.SLICE_REVIEW then
+      self.model.slice_store:remove_slice(self.selected_slice_index)
+      self.no_slice_selected = true
+      self:redraw()
     end
 
   elseif n==3 and z==1 then
-    engine.play(SlicePage.cursor_position_time / SlicePage.length)
-    SlicePage.playhead_poll:start()
+    engine.play(self.cursor_position_time / self.length)
+    self.playhead_poll:start()
   elseif n==3 and z==0 then
     engine.stop()
-    SlicePage.playhead_poll:stop()
-    SlicePage.playhead_position = nil
-    SlicePage.redraw()
+    self.playhead_poll:stop()
+    self.playhead_position = nil
+    self:redraw()
   end
 end
 
-function SlicePage.enc(n,d)
+function SlicePage:enc(n,d)
   if n==1 then
-    SlicePage.waveform_display:zoom(d)
+    self.waveform_display:zoom(d)
   elseif n==2 then
   -- move cursor along waveform
-    SlicePage.mode = SlicePageMode.SLICE_SET
-    local jump = SlicePage.waveform_display.render_duration / SlicePage.waveform_display.render_width -- jump approx 1 pixel
+    self.mode = SlicePageMode.SLICE_SET
+    local jump = self.waveform_display.render_duration / self.waveform_display.render_width -- jump approx 1 pixel
     local cursor_offset = jump * d -- neg or pos offset depending on enc turn direction
-    SlicePage.cursor_position_time = util.clamp(SlicePage.cursor_position_time + cursor_offset, 0.0, SlicePage.length)
-    SlicePage.no_slice_selected = true
-    SlicePage.waveform_display:set_center_and_update(SlicePage.cursor_position_time)
+    self.cursor_position_time = util.clamp(self.cursor_position_time + cursor_offset, 0.0, self.length)
+    self.no_slice_selected = true
+    self.waveform_display:set_center_and_update(self.cursor_position_time)
   elseif n==3 then
     -- move cursor to a slice
-    if SlicePage.no_slice_selected then
+    if self.no_slice_selected then
       -- FIXME: use d to either get 'first_slice_after_(time)' or 'first_slice_before_(time)' and remove 'closest...' if not in use
-      SlicePage.selected_slice_index = SlicePage.model.slice_store:closest_slice_index(SlicePage.cursor_position_time)
-      SlicePage.no_slice_selected = false
+      self.selected_slice_index = self.model.slice_store:closest_slice_index(self.cursor_position_time)
+      self.no_slice_selected = false
     else
-      local current_number_of_slice_times = #SlicePage.model.slice_store.slice_times
-      SlicePage.selected_slice_index = util.clamp(SlicePage.selected_slice_index + d, 1, current_number_of_slice_times)
+      local current_number_of_slice_times = #self.model.slice_store.slice_times
+      self.selected_slice_index = util.clamp(self.selected_slice_index + d, 1, current_number_of_slice_times)
     end
-    SlicePage.mode = SlicePageMode.SLICE_REVIEW
-    SlicePage.cursor_position_time = SlicePage.model.slice_store.slice_times[SlicePage.selected_slice_index]
-    SlicePage.waveform_display:set_center_and_update(SlicePage.cursor_position_time)
+    self.mode = SlicePageMode.SLICE_REVIEW
+    self.cursor_position_time = self.model.slice_store.slice_times[self.selected_slice_index]
+    self.waveform_display:set_center_and_update(self.cursor_position_time)
   end
 end
 
@@ -159,9 +161,9 @@ end
 
 -- screen drawing
 
-function SlicePage.redraw()
+function SlicePage:redraw()
   screen.clear()
-  if not SlicePage.waveform_loaded then
+  if not self.waveform_loaded then
   -- show loading dialog
     screen.level(15)
     screen.move(62,50)
@@ -170,29 +172,29 @@ function SlicePage.redraw()
   -- draw waveform
     screen.level(4)
     local x_pos = 0
-    for i,s in ipairs(SlicePage.waveform_display.samples) do
-      local height = util.round(math.abs(s) * (SlicePage.scale*SlicePage.level))
-      screen.move(util.linlin(0,SlicePage.waveform_display.render_width,10,120,x_pos), 35 - height)
+    for i,s in ipairs(self.waveform_display.samples) do
+      local height = util.round(math.abs(s) * (self.scale*self.level))
+      screen.move(util.linlin(0,self.waveform_display.render_width,10,120,x_pos), 35 - height)
       screen.line_rel(0, 2 * height)
       screen.stroke()
       x_pos = x_pos + 1
     end
   -- draw cursor position
-    local start_time = SlicePage.waveform_display.render_time_start
-    local end_time = start_time + SlicePage.waveform_display.render_duration
+    local start_time = self.waveform_display.render_time_start
+    local end_time = start_time + self.waveform_display.render_duration
     screen.level(15)
-    screen.move(util.linlin(start_time,end_time,10,120,SlicePage.cursor_position_time),18)
+    screen.move(util.linlin(start_time,end_time,10,120,self.cursor_position_time),18)
     screen.line_rel(0, 35)
     screen.stroke()
   -- draw playhead
-    if (SlicePage.playhead_position ~= nil) and (SlicePage.playhead_position < end_time) then
+    if (self.playhead_position ~= nil) and (self.playhead_position < end_time) then
       screen.level(2)
-      screen.move(util.linlin(start_time, end_time, 10, 120, SlicePage.playhead_position), 0)
+      screen.move(util.linlin(start_time, end_time, 10, 120, self.playhead_position), 0)
       screen.line_rel(0, 64)
       screen.stroke()
     end
   -- draw slice times
-    local slice_times_to_display = SlicePage.model.slice_store:slices_in_range(start_time, end_time)
+    local slice_times_to_display = self.model.slice_store:slices_in_range(start_time, end_time)
     for i, sliceTime in ipairs(slice_times_to_display) do
       screen.level(5)
       local slice_x_pos = util.linlin(start_time, end_time, 10, 120, sliceTime)
@@ -207,16 +209,16 @@ function SlicePage.redraw()
     local play_text_width, play_text_height = screen.text_extents(play_text)
     screen.move(120 - play_text_width, 62)
     screen.text(play_text)
-    if SlicePage.mode == SlicePageMode.SLICE_SET then
+    if self.mode == SlicePageMode.SLICE_SET then
       screen.move(0, 62)
       screen.text("K2: add")
       screen.move(0, 0 + play_text_height)
-      screen.text(string.format("%.2f", SlicePage.cursor_position_time))
-    elseif SlicePage.mode == SlicePageMode.SLICE_REVIEW then
+      screen.text(string.format("%.2f", self.cursor_position_time))
+    elseif self.mode == SlicePageMode.SLICE_REVIEW then
       screen.move(0, 62)
       screen.text("K2: del")
       screen.move(0, 0 + play_text_height)
-      screen.text(SlicePage.selected_slice_index .. "/" .. #SlicePage.model.slice_store.slice_times)
+      screen.text(self.selected_slice_index .. "/" .. #self.model.slice_store.slice_times)
     end
 
   end
@@ -233,13 +235,13 @@ end
 engine.name = "Recycl"
 
 function init()
-  SlicePage.init()
+  SlicePage:init()
 end
 
 function enc(n, d)
-  SlicePage.enc(n, d)
+  SlicePage:enc(n, d)
 end
 
 function key(n, z)
-  SlicePage.key(n, z)
+  SlicePage:key(n, z)
 end
