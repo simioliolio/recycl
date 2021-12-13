@@ -1,11 +1,8 @@
 table = require 'table'
+require("util")
 include("waveformdisplay")
 include("model")
-
-SlicePageMode = {
-  SLICE_SET = 1,
-  SLICE_REVIEW = 2
-}
+include("slicepagemode")
 
 SlicePage = {
   debug_mode = true,
@@ -231,10 +228,11 @@ end
 
 -- Standalone
 -- (load this script on norns to work solely on this page)
-
+print("Setting Recycl engine in slicepage")
 engine.name = "Recycl"
 
 function init()
+  print("slice.lua init")
   SlicePage:init()
 end
 
@@ -245,3 +243,7 @@ end
 function key(n, z)
   SlicePage:key(n, z)
 end
+
+--/ Standalone
+
+return SlicePage
