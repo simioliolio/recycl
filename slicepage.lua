@@ -18,6 +18,7 @@ SlicePage = {
   selected_slice_index = 1,
   no_slice_selected = true,
   scale = 30, -- TODO: Rename
+  redraw_lock = false,
 }
 
 function SlicePage:init()
@@ -159,6 +160,7 @@ end
 -- screen drawing
 
 function SlicePage:redraw()
+  if self.redraw_lock == true then return end
   screen.clear()
   if not self.waveform_loaded then
   -- show loading dialog
