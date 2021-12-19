@@ -10,7 +10,7 @@ Engine_Recycl : CroneEngine {
 
 	alloc {
 
-		// Based on @inifinitedigits' `slicePlayer4`
+		// Based on @inifinitedigits' `slicePlayer6`
 		SynthDef("GatedPlayer", {
 			arg out=0,       // *Must* be a two channel bus...
 			bufnum=0,        // ...and two channel buffer
@@ -20,20 +20,26 @@ Engine_Recycl : CroneEngine {
 			t_trig=1,        // resets playback to 'start'
 			pos_out;         // allows for pos polling, in seconds
 
-			var snd,pos,frames,duration,env, pos_kr;
+			var aOrB,startA,endA,startB,endB,crossfade;
+			var snd,sndA,sndB,posA,posB,frames,duration,env,posA_kr,posB_kr;
+
+			// latch to change trigger between the two
+			aOrB=ToggleFF.kr(t_trig);
+			startA=Latch.kr(start,aOrB);
+			endA=Latch.kr(end,aOrB);
+			startB=Latch.kr(start,1-aOrB);
+			endB=Latch.kr(end,1-aOrB);
+			crossfade=Lag.ar(K2A.ar(aOrB),0.001);
 
 			rate = rate*BufRateScale.kr(bufnum);
 			frames = BufFrames.kr(bufnum);
-
-			// TODO: redundant, but useful for an auto-gated slice player!
-			duration = frames*(end-start)/rate/context.server.sampleRate;
 
 			// envelope to clamp looping
 			env=EnvGen.ar(
 				Env.new(
 					levels: [0,1,0],
-					times: [0.0,0.0], // attack and release
-					curve:\sine,
+					times: [0.0001,0.0001], // attack and release
+					curve:\linear,
 					releaseNode: 1,
 				),
 				gate:gate,
@@ -41,25 +47,43 @@ Engine_Recycl : CroneEngine {
 
 			// If gate is on when we reach the endpoint, playback will continue in reverse.
 			// To achieve this, phasor is folded to become a retriggerable triangle ugen.
-			pos=Phasor.ar(
-				trig:t_trig,
+			posA=Phasor.ar(
+				trig:aOrB,
 				rate:rate,
 				start:start*frames,
 				end:end*frames + (end-start)*frames, // add arbitrary length to the phasor
 				resetPos:start*frames,               // so it continues to rise beyond the endpoint
 			).fold(start*frames, end*frames);
 
-			pos_kr = A2K.kr(pos / context.server.sampleRate);
+			posA_kr = A2K.kr(posA / context.server.sampleRate);
 
-			snd=BufRd.ar(
+			sndA=BufRd.ar(
 				numChannels:2,
 				bufnum:bufnum,
-				phase:pos,
+				phase:posA,
 				interpolation:4,
 			);
-			snd = snd * env;
+
+			posB=Phasor.ar(
+				trig:1-aOrB,
+				rate:rate,
+				start:start*frames,
+				end:end*frames + (end-start)*frames, // add arbitrary length to the phasor
+				resetPos:start*frames,               // so it continues to rise beyond the endpoint
+			).fold(start*frames, end*frames);
+
+			posB_kr = A2K.kr(posB / context.server.sampleRate);
+
+			sndB=BufRd.ar(
+				numChannels:2,
+				bufnum:bufnum,
+				phase:posB,
+				interpolation:4,
+			);
+
+			snd = ((crossfade * sndA) + ((1 - crossfade) * sndB)) * env;
 			Out.ar(out,snd);
-			Out.kr(pos_out, pos_kr);
+			Out.kr(pos_out, (aOrB * posA_kr) + ((1 - aOrB) * posB_kr));
 
 		}).add;
 
