@@ -1,10 +1,10 @@
 fileselect = require 'fileselect'
 
-LoadPage = {}
-
-LoadPage.redraw_lock = false
-LoadPage.file = nil
-LoadPage.file_selected_callback = function(file) end
+LoadPage = {
+    file = nil,
+    file_selected_callback = function(file) end, -- Replace
+    redraw_lock = false,
+}
 
 function LoadPage:init()
 end
@@ -34,6 +34,7 @@ end
 function LoadPage:key(n, z)
     if n == 2 and z == 1 then
         fileselect.enter(os.getenv("HOME").."/dust/audio", function(file)
+            if file == "cancel" then return end
             self.file_selected_callback(file)
             self.file = file
             self:redraw()

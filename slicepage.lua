@@ -165,8 +165,10 @@ function SlicePage:redraw()
   if not self.waveform_loaded then
   -- show loading dialog
     screen.level(15)
-    screen.move(62,50)
+    screen.move(64,25)
     screen.text_center("No sample loaded!")
+    screen.move(64,45)
+    screen.text_center("Hold K1, goto 'load' page")
   else
   -- draw waveform
     screen.level(4)
