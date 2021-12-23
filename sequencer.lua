@@ -7,7 +7,7 @@ function Sequencer:new(o)
     setmetatable(o, self)
     self.__index = self
     self.current_step = nil
-    self.sequence = {}
+    self.sequence = {} -- table of tables
     self.event_callback = function(event_table) end
     return o
 end
