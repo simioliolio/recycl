@@ -3,77 +3,156 @@ package.path = package.path .. ";../?.lua" .. ";../../?.lua"
 luaunit = require("luaunit")
 GridModel = require("gridmodel")
 GridViewModel = require("gridviewmodel")
+require 'recycl/grideventtype'
 
 TestGridModel = {}
 
-function TestGridModel:test_seqInter_whenOn_whenOffForSamePart_thenRightSeq()
+function TestGridModel:test_seqInter_whenAddOverTail_thenReplaceTail_thenRemoveOrphanTail()
+    local sut = GridModel:new()
+
+    local start_stub = {}
+    start_stub.event_type = GridEventType.START
+    start_stub.part = 1
+    local tail_stub = {}
+    tail_stub.event_type = GridEventType.TAIL
+    tail_stub.part = 1
+    sut.sequencer.sequence[1] = {start_stub}
+    sut.sequencer.sequence[2] = {tail_stub}
+    sut.sequencer.sequence[3] = {tail_stub}
+
+    sut:sequencer_interaction(2, 1, 1)
+    sut:sequencer_interaction(2, 1, 0)
+
+    luaunit.assertEquals(sut.sequencer.sequence[2], {{event_type="start", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[3], nil)
+end
+
+function TestGridModel:test_seqInter_whenNoExisting_thenAdd()
     local sut = GridModel:new()
     sut:sequencer_interaction(1, 1, 1)
     sut:sequencer_interaction(1, 1, 0)
-    luaunit.assertEquals(sut.sequencer.sequence[1], {{1, 1}})
+    luaunit.assertEquals(sut.sequencer.sequence[1], {{event_type="start", part=1}})
 end
 
-function TestGridModel:test_seqInter_whenOn_whenOnOffForOtherPart_whenOff_thenRightSeq()
+function TestGridModel:test_seqInter_whenExisting_whenPressingExistingStart_thenRemove()
     local sut = GridModel:new()
-    sut:sequencer_interaction(1, 1, 1)
-    sut:sequencer_interaction(1, 2, 1)
-    sut:sequencer_interaction(1, 2, 0)
-    sut:sequencer_interaction(1, 1, 0)
-    luaunit.assertEquals(sut.sequencer.sequence[1], {{1, 1}})
-end
-
-function TestGridModel:test_seqInter_whenExistingEvent_whenOnOff_thenClearsSeq()
-    local sut = GridModel:new()
-    sut.sequencer.sequence[1] = {{1, 1}}
+    local start_stub = {}
+    start_stub.event_type = GridEventType.START
+    start_stub.part = 1
+    sut.sequencer.sequence[1] = {start_stub}
     sut:sequencer_interaction(1, 1, 1)
     sut:sequencer_interaction(1, 1, 0)
     luaunit.assertEquals(sut.sequencer.sequence[1], nil)
 end
 
-function TestGridModel:test_seqInter_whenMultipleOnForPart_thenSeqEventWithCorrectLength()
+function TestGridModel:test_seqInter_whenExisting_whenPressingAnotherPartAtSameStep_thenReplace()
     local sut = GridModel:new()
-    sut:sequencer_interaction(1, 1, 1)
-    sut:sequencer_interaction(3, 1, 1)
+    local start_stub = {}
+    start_stub.event_type = GridEventType.START
+    start_stub.part = 1
+    sut.sequencer.sequence[1] = {start_stub}
+    sut:sequencer_interaction(1, 2, 1)
+    sut:sequencer_interaction(1, 2, 0)
+    luaunit.assertEquals(sut.sequencer.sequence[1], {{event_type="start", part=2}})
+end
+
+function TestGridModel:test_seqInter_whenPressAndHoldTwoNextDoor_thenExtends()
+    local sut = GridModel:new()
+    sut:sequencer_interaction(1, 1, 1) -- Add event
     sut:sequencer_interaction(1, 1, 0)
-    sut:sequencer_interaction(3, 1, 0)
-    luaunit.assertEquals(sut.sequencer.sequence[1], {{1, 3}})
-end
-
-function TestGridModel:test_seqInter_whenExistingEvent_whenAddLongEventBefore_thenOverlappingEventCleared()
-    local sut = GridModel:new()
-    sut.sequencer.sequence[2] = {{1, 1}}
-    sut.sequencer.sequence[4] = {{1, 1}}
-    sut:sequencer_interaction(1, 1, 1)
-    sut:sequencer_interaction(3, 1, 1)
+    sut:sequencer_interaction(1, 1, 1) -- Extend event
+    sut:sequencer_interaction(2, 1, 1)
     sut:sequencer_interaction(1, 1, 0)
+    sut:sequencer_interaction(2, 1, 0)
+    luaunit.assertEquals(sut.sequencer.sequence[1], {{event_type="start", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[2], {{event_type="tail", part=1}})
+end
+
+function TestGridModel:test_seqInter_whenLongNote_whenNoteOnOtherPart_thenReplaces()
+    local sut = GridModel:new()
+    local start_stub = {}
+    start_stub.event_type = GridEventType.START
+    start_stub.part = 1
+    local tail_stub = {}
+    tail_stub.event_type = GridEventType.TAIL
+    tail_stub.part = 1
+    sut.sequencer.sequence[1] = {start_stub}
+    sut.sequencer.sequence[2] = {tail_stub}
+    sut.sequencer.sequence[3] = {tail_stub}
+    sut:sequencer_interaction(1, 2, 1)
+    sut:sequencer_interaction(1, 2, 0)
+    luaunit.assertEquals(sut.sequencer.sequence[1], {{event_type="start", part=2}})
+    luaunit.assertEquals(sut.sequencer.sequence[2], nil)
+end
+
+function TestGridModel:test_seqInter_whenLongNote_whenNoteOnOtherPartDuringTail_thenReplacesTail()
+    local sut = GridModel:new()
+    local start_stub = {}
+    start_stub.event_type = GridEventType.START
+    start_stub.part = 1
+    local tail_stub = {}
+    tail_stub.event_type = GridEventType.TAIL
+    tail_stub.part = 1
+    sut.sequencer.sequence[1] = {start_stub}
+    sut.sequencer.sequence[2] = {tail_stub}
+    sut.sequencer.sequence[3] = {tail_stub}
+    sut:sequencer_interaction(2, 2, 1)
+    sut:sequencer_interaction(2, 2, 0)
+    luaunit.assertEquals(sut.sequencer.sequence[1], {{event_type="start", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[2], {{event_type="start", part=2}})
+end
+
+function TestGridModel:test_seqInter_whenPressAndHoldTwoFarAway_thenExtends()
+    local sut = GridModel:new()
+    sut:sequencer_interaction(1, 1, 1) -- Add event
+    sut:sequencer_interaction(1, 1, 0)
+    sut:sequencer_interaction(1, 1, 1) -- Extend event
+    sut:sequencer_interaction(4, 1, 1)
+    sut:sequencer_interaction(1, 1, 0)
+    sut:sequencer_interaction(4, 1, 0)
+    luaunit.assertEquals(sut.sequencer.sequence[1], {{event_type="start", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[2], {{event_type="tail", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[3], {{event_type="tail", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[4], {{event_type="tail", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[5], nil)
+end
+
+function TestGridModel:test_seqInter_whenExistingEvents_whenAddNew_thenRemovesExisting()
+    local sut = GridModel:new()
+    sut:sequencer_interaction(1, 1, 1) -- Add event
+    sut:sequencer_interaction(1, 1, 0)
+    sut:sequencer_interaction(1, 1, 1) -- Extend event
+    sut:sequencer_interaction(4, 1, 1)
+    sut:sequencer_interaction(1, 1, 0)
+    sut:sequencer_interaction(4, 1, 0)
+    sut:sequencer_interaction(2, 1, 1) -- Add event
+    sut:sequencer_interaction(2, 1, 0)
+    luaunit.assertEquals(sut.sequencer.sequence[1], {{event_type="start", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[2], {{event_type="start", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[3], nil)
+    luaunit.assertEquals(sut.sequencer.sequence[4], nil)
+    luaunit.assertEquals(sut.sequencer.sequence[5], nil)
+end
+
+function TestGridModel:test_seqInter_whenExistingEvents_whenAddNewWithLength_thenRemovesExisting()
+    local sut = GridModel:new()
+    sut:sequencer_interaction(1, 1, 1) -- Add event
+    sut:sequencer_interaction(1, 1, 0)
+    sut:sequencer_interaction(1, 1, 1) -- Extend event
+    sut:sequencer_interaction(4, 1, 1)
+    sut:sequencer_interaction(1, 1, 0)
+    sut:sequencer_interaction(4, 1, 0)
+    sut:sequencer_interaction(2, 1, 1) -- Add event
+    sut:sequencer_interaction(2, 1, 0)
+    sut:sequencer_interaction(2, 1, 1) -- Extend event
+    sut:sequencer_interaction(3, 1, 1)
+    sut:sequencer_interaction(2, 1, 0)
     sut:sequencer_interaction(3, 1, 0)
-    luaunit.assertEquals(sut.sequencer.sequence[2], nil)        -- removed
-    luaunit.assertEquals(sut.sequencer.sequence[4], {{1, 1}})   -- remains
+    luaunit.assertEquals(sut.sequencer.sequence[1], {{event_type="start", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[2], {{event_type="start", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[3], {{event_type="tail", part=1}})
+    luaunit.assertEquals(sut.sequencer.sequence[4], nil)
+    luaunit.assertEquals(sut.sequencer.sequence[5], nil)
 end
-
-function TestGridModel:test_updateViewSeq_thenReflectsSequence()
-    local sut = GridModel:new()
-    sut.sequencer.sequence[1] = {{1, 1}}
-    sut:update_view_seq()
-    luaunit.assertEquals(sut.view.sequence_data[1][1], 1)
-end
-
-function TestGridModel:test_updateViewSeq_whenDifferentVisiblePart_thenReflectsSequence()
-    local sut = GridModel:new()
-    sut.view.first_visible_part = 3
-    sut.sequencer.sequence[1] = {{4, 1}}
-    sut:update_view_seq()
-    luaunit.assertEquals(sut.view.sequence_data[1][2], 1)
-end
-
-function TestGridModel:test_updateViewSeq_whenDifferentVisibleStep_thenReflectsSequence()
-    local sut = GridModel:new()
-    sut.view.first_visible_step = 4
-    sut.sequencer.sequence[5] = {{1, 1}}
-    sut:update_view_seq()
-    luaunit.assertEquals(sut.view.sequence_data[2][1], 1)
-end
-
-
 
 os.exit( luaunit.LuaUnit.run() )

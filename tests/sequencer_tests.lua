@@ -16,6 +16,11 @@ function TestSequencer:test_advance_thenCurrentStepIsOne()
     luaunit.assertEquals(seq.current_step, 1)
 end
 
+function TestSequencer:test_add_whenNothingAdded_thenNoEvent()
+    local seq = Sequencer:new()
+    luaunit.assertEquals(seq.sequence[1], nil)
+end
+
 function TestSequencer:test_addEventAtStepOne_thenAddsToSequence()
     local seq = Sequencer:new()
     seq:add(1, {"data", 1})
@@ -64,6 +69,13 @@ end
 function TestSequencer:test_clear_thenClears()
     local seq = Sequencer:new()
     seq.sequence[1] = {"data", 2}
+    seq:clear(1)
+    luaunit.assertEquals(seq.sequence[1], nil)
+end
+
+function TestSequencer:test_clear_whenAdded_thenClears()
+    local seq = Sequencer:new()
+    seq:add(1, {"data", 2})
     seq:clear(1)
     luaunit.assertEquals(seq.sequence[1], nil)
 end
