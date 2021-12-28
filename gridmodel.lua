@@ -23,8 +23,6 @@ end
 function GridModel:clock_tick()
 end
 
--- actions
-
 function GridModel:play()
     self.transport_lambda(true)
     self.view.playing = true
@@ -44,6 +42,9 @@ end
 function GridModel:sequencer_interaction(x, y, z)
     local part = y + (self.view.first_visible_part - 1)
     if z == 1 then
+
+        -- On presses --
+
         local sequenced_step = x + (self.view.first_visible_step - 1)
         self.seq_buttons_held = self.seq_buttons_held + 1
 
@@ -60,13 +61,11 @@ function GridModel:sequencer_interaction(x, y, z)
             local existing_at_step = self.sequencer.sequence[sequenced_step]
             if not existing_at_step then
                 -- No existing event, add event
-                print("no existing event")
                 self:clear_note(sequenced_step)
                 self:add_start_event(sequenced_step, part)
             else
                 if #existing_at_step ~= 1 then print("!! duplicate events argh only working with mono sequence !!") return end
                 local existing_event = existing_at_step[1]
-                print("event_type: " .. existing_event.event_type)
                 if existing_event.event_type == GridEventType.START then
 
                     if part ~= existing_event.part then
@@ -76,7 +75,7 @@ function GridModel:sequencer_interaction(x, y, z)
                     else
                         -- Could be trying to remove event, or trying to add tail to event
                         -- Save for later, but only for the part first recorded
-                        -- FIXME surely there is a better way to do this. Only add to table if part is the same as existing value's part
+                        -- FIXME: surely there is a better way to do this. Only add to table if part is the same as the part found in the table
                         local focus_part = part
                         if #self.on_presses_for_edited_part > 0 then
                             local first = self.on_presses_for_edited_part[1]
@@ -87,24 +86,22 @@ function GridModel:sequencer_interaction(x, y, z)
                             table.insert(self.on_presses_for_edited_part, on_press)
                         end
                     end
-
                 elseif existing_event.event_type == GridEventType.TAIL then
-                    -- Is only a tail...
-                    print("its only a tail")
                     self:clear_note(sequenced_step)
                     self:add_start_event(sequenced_step, part)
-                else
-                    print("UNKNOWN, " .. existing_event.event_type)
                 end
             end
         end
     else
+
+        -- Off presses --
+
         self.seq_buttons_held = self.seq_buttons_held - 1
         if self.seq_buttons_held == 0 then
             if #self.on_presses_for_edited_part == 1 then
                 -- Only one press when press on existing event, so remove
                 local clear_press = self.on_presses_for_edited_part[1]
-                self.sequencer:clear(clear_press.step)
+                self:clear_note(clear_press.step)
             elseif #self.on_presses_for_edited_part == 2 then
                 -- A second on press tried to extend the length
                 local start_press = self.on_presses_for_edited_part[1]
@@ -114,7 +111,6 @@ function GridModel:sequencer_interaction(x, y, z)
                     local part_for_tail = start_press.part
                     local tail_start = start_press.step + 1
                     for i = tail_start, start_press.step + number_of_tails do
-                        print("adding tail events! " .. i)
                         self:add_tail_event(i, part_for_tail)
                     end
                 end
@@ -126,8 +122,8 @@ function GridModel:sequencer_interaction(x, y, z)
 end
 
 -- Clears a note and tail from a specific step
+-- TODO: Make private
 function GridModel:clear_note(step)
-    -- TODO: Don't pass part here, search for existing note and use part from there.
     local existing = self.sequencer.sequence[step]
     if not existing then return end
     if #existing == 0 then return end
@@ -146,6 +142,7 @@ function GridModel:clear_note(step)
     end
 end
 
+-- TODO: Make private
 function GridModel:add_start_event(step, part)
     local event = {}
     event.event_type = GridEventType.START
@@ -153,6 +150,7 @@ function GridModel:add_start_event(step, part)
     self.sequencer:add(step, event)
 end
 
+-- TODO: Make private
 function GridModel:add_tail_event(step, part)
     local event = {}
     event.event_type = GridEventType.TAIL
@@ -161,6 +159,7 @@ function GridModel:add_tail_event(step, part)
 end
 
 -- Convert raw sequence data to view sequence data
+-- TODO: Make private
 function GridModel:update_view_seq()
     self.view:init_sequence_data() -- init to blank 16x7 'matrix'
     for sequenced_step = self.view.first_visible_step, self.view.max_sequence_length do
@@ -178,7 +177,5 @@ function GridModel:update_view_seq()
     end
     self.update_lambda()
 end
-
--- /actions
 
 return GridModel
