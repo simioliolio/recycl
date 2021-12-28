@@ -41,8 +41,6 @@ end
 -- Data:
     -- event_type: ["start"]/["tail"]
     -- part: [part number]
-    -- if event_type == "start":
-        -- length: [length of event in steps]
 function GridModel:sequencer_interaction(x, y, z)
     local part = y + (self.view.first_visible_part - 1)
     if z == 1 then
@@ -63,6 +61,7 @@ function GridModel:sequencer_interaction(x, y, z)
             if not existing_at_step then
                 -- No existing event, add event
                 print("no existing event")
+                self:clear_note(sequenced_step)
                 self:add_start_event(sequenced_step, part)
             else
                 if #existing_at_step ~= 1 then print("!! duplicate events argh only working with mono sequence !!") return end
@@ -72,7 +71,7 @@ function GridModel:sequencer_interaction(x, y, z)
 
                     if part ~= existing_event.part then
                         -- Part is different. Kill the existing and replace.
-                        self:clear_note(sequenced_step, existing_event.part)
+                        self:clear_note(sequenced_step)
                         self:add_start_event(sequenced_step, part)
                     else
                         -- Could be trying to remove event, or trying to add tail to event
@@ -92,7 +91,7 @@ function GridModel:sequencer_interaction(x, y, z)
                 elseif existing_event.event_type == GridEventType.TAIL then
                     -- Is only a tail...
                     print("its only a tail")
-                    self:clear_note(sequenced_step, part)
+                    self:clear_note(sequenced_step)
                     self:add_start_event(sequenced_step, part)
                 else
                     print("UNKNOWN, " .. existing_event.event_type)
@@ -123,11 +122,20 @@ function GridModel:sequencer_interaction(x, y, z)
             self.on_presses_for_edited_part = {}
         end
     end
+    self:update_view_seq()
 end
 
-function GridModel:clear_note(step, part)
+-- Clears a note and tail from a specific step
+function GridModel:clear_note(step)
+    -- TODO: Don't pass part here, search for existing note and use part from there.
+    local existing = self.sequencer.sequence[step]
+    if not existing then return end
+    if #existing == 0 then return end
+    local first_event = existing[1]
+    local part = first_event.part
     self.sequencer:clear(step)
-    for i = step + 1, step + 16 do
+    -- After clearing at the step specified, clear any trailing tail for the same part
+    for i = step + 1, step + 16 do -- TODO: Does not need to be 16
         local future_events = self.sequencer.sequence[i]
         if not future_events then return end
         local future_event = future_events[1]
@@ -161,11 +169,10 @@ function GridModel:update_view_seq()
             goto continue
         end
         for _, event in ipairs(events_for_step) do
-            local sequenced_part = event[1]
+            local sequenced_part = event.part
             local visible_part = sequenced_part - (self.view.first_visible_part - 1)
             local visible_step = sequenced_step - (self.view.first_visible_step - 1)
-            local length = event[2]
-            self.view.sequence_data[visible_step][visible_part] = length
+            self.view.sequence_data[visible_step][visible_part] = event.event_type
         end
         ::continue::
     end
