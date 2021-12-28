@@ -47,17 +47,25 @@ end
 
 function redraw()
     g:all(0)
+    -- sequence
     for step_number, step in ipairs(model.view.sequence_data) do
         for part, event_type in ipairs(step) do
             if event_type == GridEventType.START then
                 g:led(step_number, part, 15)
             elseif event_type == GridEventType.TAIL then
                 g:led(step_number, part, 10)
-            else
-                -- leave blank
             end
         end
     end
+    -- sequence playhead
+    local playhead = model.view.current_visible_step
+    if model.view.current_visible_step then print("model.view.current_visible_step: " .. model.view.current_visible_step) end
+
+    if playhead ~= nil then
+        print("playhead: " .. playhead)
+        for i = 1, 7 do g:led(playhead, i, 3) end
+    end
+    -- transport
     if model.view.playing then
         g:led(1, 8, 0)
         g:led(2, 8, 15)

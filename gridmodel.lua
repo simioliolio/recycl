@@ -29,7 +29,8 @@ function GridModel:clock_tick()
 end
 
 function GridModel:did_advance(current_step)
-    print("current step: " .. current_step)
+    self.view:update_current_visible_step(current_step)
+    self.update_lambda()
 end
 
 function GridModel:play()
@@ -42,6 +43,7 @@ function GridModel:stop()
     self.transport_lambda(false)
     self.view.playing = false
     self.sequencer.current_step = nil
+    self.view:update_current_visible_step(nil)
     self.update_lambda()
 end
 
@@ -173,7 +175,7 @@ end
 -- TODO: Make private
 function GridModel:update_view_seq()
     self.view:init_sequence_data() -- init to blank 16x7 'matrix'
-    for sequenced_step = self.view.first_visible_step, self.view.max_sequence_length do
+    for sequenced_step = self.view.first_visible_step, self.view.max_visible_sequence_length do
         local events_for_step = self.sequencer.sequence[sequenced_step]
         if events_for_step == nil then
             goto continue
