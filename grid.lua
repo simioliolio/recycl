@@ -11,6 +11,9 @@ function init()
         if play == true then t.start() else t.stop() end
     end
     model.update_lambda = function() redraw() end
+    model.set_clock_div = function(model_clock_div)
+        clock_div = model_clock_div
+    end
     g = grid.connect()
 
     g.key = function(x, y, z)
@@ -30,8 +33,8 @@ end
 
 function tick()
     while true do
-
         clock.sync(1 / clock_div)
+        model:clock_tick()
     end
 end
 
@@ -46,11 +49,6 @@ function redraw()
     g:all(0)
     for step_number, step in ipairs(model.view.sequence_data) do
         for part, event_type in ipairs(step) do
-            -- TODO: Remove
-            if step_number == 1 or step_number == 2 then
-                print("step: " .. step_number .. " part: " .. part .. " event_type: " .. event_type)
-            end
-
             if event_type == GridEventType.START then
                 g:led(step_number, part, 15)
             elseif event_type == GridEventType.TAIL then

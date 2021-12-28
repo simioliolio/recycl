@@ -9,18 +9,27 @@ function GridModel:new(o)
     setmetatable(o, self)
     self.__index = self
     self.view = GridViewModel:new()
-    self.transport_lambda = function(play) end  -- replace externally
-    self.update_lambda = function() end         -- replace externally
+    self.transport_lambda = function(play) end      -- replace externally
+    self.update_lambda = function() end             -- replace externally
+    self.set_clock_div = function(clock_div) end    -- replace externally
     self.number_of_parts = 8
     self.sequence_length = 8
     self.sequencer = Sequencer:new()
+    self.sequencer.did_advance = function(current_step) self:did_advance(current_step) end
     self.seq_buttons_held = 0
     self.part_being_edited = nil
     self.on_presses_for_edited_part = {} -- TODO: rename
+    self.clock_div = 4 -- TODO: Could move to view model
+    self.set_clock_div(self.clock_div)
     return o
 end
 
 function GridModel:clock_tick()
+    self.sequencer:advance()
+end
+
+function GridModel:did_advance(current_step)
+    print("current step: " .. current_step)
 end
 
 function GridModel:play()
@@ -32,6 +41,7 @@ end
 function GridModel:stop()
     self.transport_lambda(false)
     self.view.playing = false
+    self.sequencer.current_step = nil
     self.update_lambda()
 end
 
