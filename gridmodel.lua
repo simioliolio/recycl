@@ -111,6 +111,7 @@ function GridModel:sequencer_interaction(x, y, z)
                     local part_for_tail = start_press.part
                     local tail_start = start_press.step + 1
                     for i = tail_start, start_press.step + number_of_tails do
+                        self:clear_note(i)
                         self:add_tail_event(i, part_for_tail)
                     end
                 end

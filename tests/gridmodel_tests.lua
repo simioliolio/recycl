@@ -185,7 +185,7 @@ function TestGridModel:test_seqInter_whenExistingEvents_whenAddNewOnTailFor2ndPa
     luaunit.assertEquals(sut.sequencer.sequence[5], nil)
 end
 
-function TestGridModel:test_seqInter_whenExistingEvents_whenAddNewWithLength_thenRemovesExisting()
+function TestGridModel:test_seqInter_whenExistingTailEvents_whenAddNewWithLength_thenRemovesExistingTail()
     local sut = GridModel:new()
     sut:sequencer_interaction(1, 1, 1) -- Add event
     sut:sequencer_interaction(1, 1, 0)
@@ -204,6 +204,22 @@ function TestGridModel:test_seqInter_whenExistingEvents_whenAddNewWithLength_the
     luaunit.assertEquals(sut.sequencer.sequence[3], {{event_type="tail", part=1}})
     luaunit.assertEquals(sut.sequencer.sequence[4], nil)
     luaunit.assertEquals(sut.sequencer.sequence[5], nil)
+end
+
+function TestGridModel:test_seqInter_whenExistingStartEvents_whenAddNewWithLengthOnDifferentPart_thenRemovesExisting()
+    local sut = GridModel:new()
+    sut:sequencer_interaction(2, 1, 1) -- Add event
+    sut:sequencer_interaction(2, 1, 0)
+    sut:sequencer_interaction(1, 2, 1) -- Add event before on different part
+    sut:sequencer_interaction(1, 2, 0)
+    sut:sequencer_interaction(1, 2, 1) -- Extend new event
+    sut:sequencer_interaction(3, 2, 1)
+    sut:sequencer_interaction(1, 2, 0)
+    sut:sequencer_interaction(3, 2, 0)
+    luaunit.assertEquals(sut.sequencer.sequence[1], {{event_type="start", part=2}})
+    luaunit.assertEquals(sut.sequencer.sequence[2], {{event_type="tail", part=2}})
+    luaunit.assertEquals(sut.sequencer.sequence[3], {{event_type="tail", part=2}})
+    luaunit.assertEquals(sut.sequencer.sequence[4], nil)
 end
 
 os.exit( luaunit.LuaUnit.run() )
