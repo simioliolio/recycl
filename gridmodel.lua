@@ -35,12 +35,20 @@ function GridModel:did_advance(current_step)
     self.update_lambda()
 end
 
+function GridModel:interaction(x, y, z)
+    if x == 1 and y == 8 and z == 1 then self:stop() end
+    if x == 2 and y == 8 and z == 1 then self:play() end
+    if y < 8 then self:sequencer_interaction(x, y, z) end
+end
+
+-- TODO: make private
 function GridModel:play()
     self.transport_lambda(true)
     self.view.playing = true
     self.update_lambda()
 end
 
+-- TODO: make private
 function GridModel:stop()
     self.transport_lambda(false)
     self.view.playing = false

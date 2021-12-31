@@ -40,9 +40,7 @@ end
 
 function interpret_grid(x, y, z)
     print("interpret grid " .. x .. y .. z)
-    if x == 1 and y == 8 and z == 1 then model:stop() end
-    if x == 2 and y == 8 and z == 1 then model:play() end
-    if y < 8 then model:sequencer_interaction(x, y, z) end
+    model:interaction(x, y, z)
 end
 
 function redraw()
