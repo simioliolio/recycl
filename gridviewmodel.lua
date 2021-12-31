@@ -51,7 +51,6 @@ function GridViewModel:update_current_visible_step(current_step)
             return
         end
         self.current_visible_step = current_step - (self.first_visible_step - 1)
-        print("new current_visible_step: " .. self.current_visible_step)
     end
 
 end

@@ -10,12 +10,11 @@ function GridModel:new(o)
     self.__index = self
     self.view = GridViewModel:new()
     self.transport_lambda = function(play) end      -- replace externally
-    self.update_lambda = function() end             -- replace externally
-    self.set_clock_div = function(clock_div) end    -- replace externally
+    self.update_lambda = function() print("error, no update function set") end              -- TODO: Pass on init?
+    self.set_clock_div = function(clock_div) print("error, no clock div function set") end  --
     self.number_of_parts = 8
     self.sequence_length = 8
     self.sequencer = Sequencer:new()
-    self.sequencer.did_advance = function(current_step) self:did_advance(current_step) end
     self.seq_buttons_held = 0
     self.part_being_edited = nil
     self.on_presses_for_edited_part = {} -- TODO: rename
@@ -25,6 +24,9 @@ function GridModel:new(o)
 end
 
 function GridModel:clock_tick()
+    -- Update callback to ensure an externally-set `update_lambda` is used in `did_advance()`
+    -- FIXME: Remove if `update_lambda` is passed on init
+    self.sequencer.did_advance = function(current_step) self:did_advance(current_step) end
     self.sequencer:advance()
 end
 

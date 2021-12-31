@@ -59,11 +59,8 @@ function redraw()
     end
     -- sequence playhead
     local playhead = model.view.current_visible_step
-    if model.view.current_visible_step then print("model.view.current_visible_step: " .. model.view.current_visible_step) end
-
     if playhead ~= nil then
-        print("playhead: " .. playhead)
-        for i = 1, 7 do g:led(playhead, i, 3) end
+        for i = 1, 7 do g:led(playhead, i, 1) end
     end
     -- transport
     if model.view.playing then
