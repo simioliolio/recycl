@@ -16,10 +16,16 @@ function GridModel:new(o)
     self.sequence_length = 8
     self.sequencer = Sequencer:new()
     self.seq_buttons_held = 0
+    self.current_held_interations = {{}} -- {x, y, mode}
     self.part_being_edited = nil
     self.on_presses_for_edited_part = {} -- TODO: rename
     self.clock_div = 4 -- TODO: Could move to view model
     self.set_clock_div(self.clock_div)
+    self.Modes = {
+        SEQUENCE = "sequence",
+        CLOCK_DIV = "clock_div",
+    }
+    self.mode = self.Modes.SEQUENCE
     return o
 end
 
@@ -36,16 +42,42 @@ function GridModel:did_advance(current_step)
 end
 
 function GridModel:interaction(x, y, z)
-    if x == 1 and y == 8 and z == 1 then self:stop() end
-    if x == 2 and y == 8 and z == 1 then self:play() end
-    if y < 8 then self:sequencer_interaction(x, y, z) end
+    -- Determine if mode has changed
+    if y == 8 then
+        if z == 1 then
+            if x == 3 then
+                self.mode = self.Modes.CLOCK_DIV
+            end
+        else
+            -- All off-presses return to sequence mode.
+            -- Dangling on presses for row 8 will be ignored
+            self.mode = self.Modes.SEQUENCE
+        end
+    end
+    -- Route on presses
+    if z == 1 then
+        -- TODO: Way of doing this in one step?
+        local held = {}
+        held[y] = self.mode
+        self.current_held_interations[x] = held
+        self:route(x, y, 1, self.mode)
+    else
+        -- Match off presses to mode of previous on press, and flush
+        local mode_of_previous_on_press = self.current_held_interations[x][y]
+        if mode_of_previous_on_press then
+            self:route(x, y, 0, mode_of_previous_on_press)
+            self.current_held_interations[x][y] = nil
+        else
+            print("non-fatal: no on press recorded for off press " .. x .. y .. z)
+        end
+    end
+    self.update_lambda()
 end
 
 -- TODO: make private
 function GridModel:play()
     self.transport_lambda(true)
     self.view.playing = true
-    self.update_lambda()
 end
 
 -- TODO: make private
@@ -54,13 +86,29 @@ function GridModel:stop()
     self.view.playing = false
     self.sequencer.current_step = nil
     self.view:update_current_visible_step(nil)
-    self.update_lambda()
+end
+
+-- TODO: make private
+function GridModel:route(x, y, z, mode)
+    -- Globals
+    if x == 1 and y == 8 and z == 1 then self:stop() return
+    elseif x == 2 and y == 8 and z == 1 then self:play() return
+    end
+    -- Per mode
+    if mode == self.Modes.SEQUENCE then
+        if y < 8 then self:sequencer_interaction(x, y, z) end
+        return
+    elseif mode == self.Modes.CLOCK_DIV then
+        -- TODO: Handle clock div interaction
+        return
+    end
 end
 
 -- Based on sequencer interaction, add data into sequencer
 -- Data:
     -- event_type: ["start"]/["tail"]
     -- part: [part number]
+-- TODO: make private
 function GridModel:sequencer_interaction(x, y, z)
     local part = y + (self.view.first_visible_part - 1)
     if z == 1 then
@@ -198,7 +246,6 @@ function GridModel:update_view_seq()
         end
         ::continue::
     end
-    self.update_lambda()
 end
 
 return GridModel
