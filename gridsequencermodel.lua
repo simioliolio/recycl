@@ -22,7 +22,6 @@ end
 function GridSequencerModel:sequencer_interaction(x, y, z)
     local part = y + (self.view.first_visible_part - 1)
     if z == 1 then
-        -- On presses --
         local sequenced_step = x + (self.view.first_visible_step - 1)
         self.seq_buttons_held = self.seq_buttons_held + 1
 
@@ -42,7 +41,7 @@ function GridSequencerModel:sequencer_interaction(x, y, z)
                 self:clear_note(sequenced_step)
                 self:add_start_event(sequenced_step, part)
             else
-                if #existing_at_step ~= 1 then print("!! duplicate events argh only working with mono sequence !!") return end
+                if #existing_at_step ~= 1 then print("!! duplicate events found at a single step when trying to work with mono sequence !!") return end
                 local existing_event = existing_at_step[1]
                 if existing_event.event_type == GridEventType.START then
 
@@ -70,8 +69,9 @@ function GridSequencerModel:sequencer_interaction(x, y, z)
                 end
             end
         end
-    else
-        -- Off presses --
+    end
+
+    if z == 0 then
         self.seq_buttons_held = self.seq_buttons_held - 1
         if self.seq_buttons_held == 0 then
             if #self.on_presses_for_edited_part == 1 then
