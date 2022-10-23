@@ -50,16 +50,15 @@ function GridSequencerModel:sequencer_interaction(x, y, z)
                         self:clear_note(sequenced_step)
                         self:add_start_event(sequenced_step, part)
                     else
-                        -- Could be trying to remove event, or trying to add tail to event
-                        -- Save for later, but only for the part first recorded
-                        -- FIXME: surely there is a better way to do this. Only add to table if part is the same as the part found in the table
-                        local focus_part = part
-                        if #self.on_presses_for_edited_part > 0 then
-                            local first = self.on_presses_for_edited_part[1]
-                            focus_part = first.part
+                        local on_press = nil
+                        if #self.on_presses_for_edited_part == 0 then
+                            on_press = {step=sequenced_step, part=part}
+                        else
+                            if self.on_presses_for_edited_part[1].part == part then
+                                on_press = {step=sequenced_step, part=part}
+                            end
                         end
-                        if part == focus_part then
-                            local on_press = {step=sequenced_step, part=part}
+                        if on_press then
                             table.insert(self.on_presses_for_edited_part, on_press)
                         end
                     end
