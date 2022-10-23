@@ -1,5 +1,6 @@
 GridViewModel = {}
 
+-- View model used to set grid leds
 function GridViewModel:new(o)
     o = o or {}
     setmetatable(o, self)
