@@ -6,6 +6,7 @@ table = require 'table'
 include("waveformdisplay")
 include("model")
 include("slicepagemode")
+Grid = include("grid")
 
 MenuPage = include("menupage")
 LoadPage = include("loadpage")
@@ -23,6 +24,8 @@ end
 
 function setup_pages()
 
+    grid_base = Grid:new()
+
     -- ! Uncomment appropriate `show_page` call for page currently under development !
 
     MenuPage.page_names = { "load", "slice" }
@@ -30,11 +33,11 @@ function setup_pages()
     -- show_page(MenuPage)
 
     LoadPage.file = nil
-    show_page(LoadPage)
+    -- show_page(LoadPage)
 
     SlicePage.debug_mode = true -- TODO: Pass in init
     SlicePage:init()
-    -- show_page(SlicePage)
+    show_page(SlicePage)
 end
 
 function show_page(page_to_show)

@@ -2,6 +2,7 @@ table = require 'table'
 include("waveformdisplay")
 include("model")
 include("slicepagemode")
+Grid = include("grid")
 
 MenuPage = include("menupage")
 LoadPage = include("loadpage")
@@ -14,6 +15,7 @@ local page_showing = nil
 engine.name = "Recycl"
 
 function init()
+    grid_base = Grid:new({})
     setup_pages()
     SlicePage:init()
 end
