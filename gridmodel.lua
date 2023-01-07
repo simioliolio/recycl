@@ -1,7 +1,7 @@
-GridViewModel = require 'recycl/gridviewmodel'
-Sequencer = require 'recycl/sequencer'
-require 'recycl/grideventtype'
-GridSequencerModel = require 'recycl/gridsequencermodel'
+GridViewModel = include 'recycl/gridviewmodel'
+Sequencer = include 'recycl/sequencer'
+include 'recycl/grideventtype'
+GridSequencerModel = include 'recycl/gridsequencermodel'
 
 GridModel = {}
 

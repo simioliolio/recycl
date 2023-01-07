@@ -1,4 +1,8 @@
-package.path = package.path .. ";../?.lua"
+-- To run:
+-- $ cd <test file folder>
+-- $ lua <test file>
+
+require("test_helper")
 
 luaunit = require("luaunit")
 require("waveformdisplay")

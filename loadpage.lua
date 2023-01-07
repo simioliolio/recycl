@@ -6,9 +6,6 @@ LoadPage = {
     redraw_lock = false,
 }
 
-function LoadPage:init()
-end
-
 function LoadPage:redraw()
     if self.redraw_lock == true then return end
 
@@ -41,22 +38,6 @@ function LoadPage:key(n, z)
         end
         )
     end
-end
-
-function init()
-    LoadPage:init()
-end
-
-function enc(n, d)
-
-end
-
-function key(n, z)
-    LoadPage:key(n, z)
-end
-
-function redraw()
-    LoadPage:redraw()
 end
 
 return LoadPage

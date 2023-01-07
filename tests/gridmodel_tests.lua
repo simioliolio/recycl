@@ -1,9 +1,13 @@
-package.path = package.path .. ";../?.lua" .. ";../../?.lua" .. ";recycl/?.lua" .. ";recycl/tests/?.lua"
+-- To run:
+-- $ cd <test file folder>
+-- $ lua <test file>
+
+require("test_helper")
 
 luaunit = require("luaunit")
 GridModel = require("gridmodel")
 GridViewModel = require("gridviewmodel")
-require 'recycl/grideventtype'
+require 'grideventtype'
 
 TestGridModel = {}
 

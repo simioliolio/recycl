@@ -1,7 +1,7 @@
-GridModel = require 'recycl/gridmodel'
-GridViewModel = require 'recycl/gridviewmodel'
-Sequencer = require 'recycl/sequencer'
-GridEventType = require 'recycl/grideventtype'
+GridModel = include 'recycl/gridmodel'
+GridViewModel = include 'recycl/gridviewmodel'
+Sequencer = include 'recycl/sequencer'
+GridEventType = include 'recycl/grideventtype'
 
 function init()
     clock_div = 4

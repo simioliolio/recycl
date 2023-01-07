@@ -6,11 +6,6 @@ MenuPage = {
     redraw_lock = false,
 }
 
-
-
-function MenuPage:init()
-end
-
 function MenuPage:redraw()
     if self.redraw_lock == true then return end
 
@@ -49,24 +44,6 @@ function MenuPage:enc(n, d)
 end
 
 function MenuPage:key(n, d)
-end
-
--- Standalone
-
-function init()
-    MenuPage:init()
-end
-
-function enc(n, d)
-    MenuPage:enc(n, d)
-end
-
-function key(n, z)
-
-end
-
-function redraw()
-    MenuPage:redraw()
 end
 
 return MenuPage

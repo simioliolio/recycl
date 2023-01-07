@@ -2,12 +2,10 @@ table = require 'table'
 include("waveformdisplay")
 include("model")
 include("slicepagemode")
-fileselect = require 'fileselect'
 
-MenuPage = require 'recycl/menupage'
--- Use MenuPage to access other pages...
-LoadPage = require 'recycl/loadpage'
-SlicePage = require 'recycl/slicepage'
+MenuPage = include("menupage")
+LoadPage = include("loadpage")
+SlicePage = include("slicepage")
 
 local all_pages = {MenuPage, LoadPage, SlicePage}
 local pages_via_menu = {LoadPage, SlicePage}
@@ -15,10 +13,8 @@ local page_showing = nil
 
 engine.name = "Recycl"
 
-
 function init()
     setup_pages()
-    SlicePage.debug_mode = false -- TODO: Make as part of init
     SlicePage:init()
 end
 
@@ -50,7 +46,7 @@ function enc(n, d)
 end
 
 function key(n, z)
-    -- intercept k1
+    -- intercept k1 to show page menu
     if n == 1 and z == 1 then
         show_page(MenuPage)
         return
@@ -59,7 +55,7 @@ function key(n, z)
         show_page(page)
         return
     end
-    -- send all others to page
+    -- send all others to whatever is showing
     page_showing:key(n, z)
 end
 

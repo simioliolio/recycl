@@ -5,8 +5,7 @@ include("model")
 include("slicepagemode")
 
 SlicePage = {
-  debug_mode = true,
-  debug_file = "/home/we/dust/audio/common/The Breaks/11thhouse.wav",
+  debug_mode = false,
   level = 1.0,
   length = 1,
   waveform_loaded = false,
@@ -25,7 +24,7 @@ function SlicePage:init()
   self:setup_softcut()
   self:register_playhead_poll()
   self:reset()
-  if self.debug_mode then self:load_file(self.debug_file) end
+  if self.debug_mode then self:load_file("/home/we/dust/audio/tehn/drumev.wav") end
 end
 
 function SlicePage:setup_softcut()
@@ -228,26 +227,5 @@ function SlicePage:redraw()
 end
 
 --/ screen drawing
-
-
--- Standalone
--- (load this script on norns to work solely on this page)
-print("Setting Recycl engine in slicepage")
-engine.name = "Recycl"
-
-function init()
-  print("slice.lua init")
-  SlicePage:init()
-end
-
-function enc(n, d)
-  SlicePage:enc(n, d)
-end
-
-function key(n, z)
-  SlicePage:key(n, z)
-end
-
---/ Standalone
 
 return SlicePage

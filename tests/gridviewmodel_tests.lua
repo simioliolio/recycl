@@ -1,8 +1,12 @@
-package.path = package.path .. ";../?.lua" .. ";../../?.lua"
+-- To run:
+-- $ cd <test file folder>
+-- $ lua <test file>
+
+require("test_helper")
 
 luaunit = require("luaunit")
 
-GridViewModel = require("gridviewmodel")
+GridViewModel = include("gridviewmodel")
 
 TestGridViewModel = {}
 

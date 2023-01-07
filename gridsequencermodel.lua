@@ -1,5 +1,5 @@
-Sequencer = require 'recycl/sequencer'
-GridViewModel = require("recycl/gridviewmodel")
+Sequencer = include 'recycl/sequencer'
+GridViewModel = include("recycl/gridviewmodel")
 
 GridSequencerModel = {}
 
