@@ -7,7 +7,7 @@ WaveformDisplay = {
     render_time_start = 0 - (1.5 / 2),
     min_render_duration = 128 / 48000,  -- TODO: don't hard code sample rate
     max_render_duration = 1,            -- Should set when file length is known
-    update_data_request = function(start, duration) end
+    update_data_request = function(start, duration, no_of_values) print("Error! update_data_request callback not set") end
 }
 
 function WaveformDisplay:new(o)
@@ -59,12 +59,12 @@ function WaveformDisplay:zoom(d)
     -- change start time based on center and new duration
     self.render_time_start = center - (self.render_duration / 2)
     -- update
-    self.update_data_request(self.render_time_start, self.render_duration)
+    self.update_data_request(self.render_time_start, self.render_duration, self.render_width)
 end
 
 function WaveformDisplay:set_center_and_update(time)
     self.render_time_start = time - (self.render_duration / 2)
-    self.update_data_request(self.render_time_start, self.render_duration)
+    self.update_data_request(self.render_time_start, self.render_duration, self.render_width)
 end
 
 return WaveformDisplay

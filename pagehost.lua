@@ -6,6 +6,7 @@ table = require 'table'
 include("waveformdisplay")
 include("model")
 include("slicepagemode")
+include("sliceplayer")
 Grid = include("grid")
 
 MenuPage = include("menupage")

@@ -1,13 +1,12 @@
 table = require 'table'
 require("util")
-include("waveformdisplay")
-include("model")
-include("slicepagemode")
+include("waveformdisplay") -- TODO: Remove?
+include("model")           --
+include("slicepagemode")   --
 
 SlicePage = {
   debug_mode = false,
-  level = 1.0,
-  length = 1,
+  level = 1.0, -- TODO: Remove?
   waveform_loaded = false,
   mode = SlicePageMode.SLICE_SET,
   waveform_display = WaveformDisplay:new(),
@@ -18,89 +17,50 @@ SlicePage = {
   no_slice_selected = true,
   scale = 30, -- TODO: Rename
   redraw_lock = false,
+  player = SlicePlayer:new() -- TODO: 'Inject'
 }
 
 function SlicePage:init()
-  self:setup_softcut()
-  self:register_playhead_poll()
+  self.player.on_render = self.on_render
+  self.player.on_playhead_poll = function (pos) self:on_playhead_poll(pos) end
+  self.player:register_playhead_poll()
+  self.player:setup_softcut()
   self:reset()
   if self.debug_mode then self:load_file("/home/we/dust/audio/tehn/drumev.wav") end
 end
 
-function SlicePage:setup_softcut()
-  softcut.buffer_clear()
-  audio.level_adc_cut(1)
-  softcut.level_input_cut(1,2,1.0)
-  softcut.level_input_cut(2,2,1.0)
-  softcut.phase_quant(1,0.01)
-  softcut.poll_start_phase()
-  softcut.event_render(self.on_render)
-end
-
-function SlicePage:register_playhead_poll()
-  self.playhead_poll = poll.set('playhead', function(pos)
-    self.playhead_position = pos
-    self:redraw()
-  end)
-  self.playhead_poll.time = 0.1
-end
-
 function SlicePage:reset()
-  for i=1,2 do
-    softcut.enable(i,1)
-    softcut.buffer(i,i)
-    softcut.level(1,1.0)
-    softcut.position(i,0)
-    softcut.rate(i,1.0)
-    softcut.fade_time(1,0)
-  end
+  self.player:reset()
   self.cursor_position_time = 0
   self.waveform_display = WaveformDisplay:new(
-    {update_data_request = self.update_content,
-    max_render_duration = self.length}
+    {update_data_request = function(start, duration, no_of_values) self.player:render(start, duration, no_of_values) end,
+    max_render_duration = self.player.length}
   )
   self.model = Model:new()
-  self.model.slice_store:set_length(self.length)
+  self.model.slice_store:set_length(self.player.length)
   self.playhead_position = nil
   -- trigger intial waveform load
-  self.update_content(self.waveform_display.render_time_start, self.waveform_display.render_duration)
+  self.player:render(self.waveform_display.render_time_start, self.waveform_display.render_duration, self.waveform_display.render_width)
 end
-
-  --/ startup
-
-  -- file loading
 
 function SlicePage:load_file(file)
-  softcut.buffer_clear_region(1,-1)
   self.selecting_file = false
-  if file ~= "cancel" then
-    local ch, samples = audio.file_info(file)
-    self.length = samples / 48000 -- shouldn't hard code?
-    softcut.buffer_read_mono(file,0,0,-1,1,1) -- only split mono for now?
-    softcut.buffer_read_mono(file,0,0,-1,1,2) --
-    engine.load_audio_file(file)
-    self:reset()
-    self.waveform_loaded = true
-  end
+  self.player:load_file(file)
+  self:reset()
+  self.waveform_loaded = true
 end
 
---/ file loading
-
-
--- softcut render event callback
+-- Called async after `self.player:render` call
 -- FIXME: Is there a way of using `:` / `self` here?
 function SlicePage.on_render(ch, start, i, s)
   SlicePage.waveform_display:set_waveform_data(i, s)
   SlicePage:redraw()
 end
 
--- trigger render event
--- FIXME: Is there a way of using `:` / `self` here?
-function SlicePage.update_content(winstart,duration)
-  softcut.render_buffer(1, util.clamp(winstart, 0.0, SlicePage.length), duration, SlicePage.waveform_display.render_width)
+function SlicePage:on_playhead_poll(pos)
+  self.playhead_position = pos
+  self:redraw()
 end
-
---/ waveform view
 
 -- user input
 
@@ -117,11 +77,11 @@ function SlicePage:key(n,z)
     end
 
   elseif n==3 and z==1 then
-    engine.play(self.cursor_position_time / self.length)
-    self.playhead_poll:start()
+    self.player:play(self.cursor_position_time)
+    self.player:start_playhead_poll()
   elseif n==3 and z==0 then
-    engine.stop()
-    self.playhead_poll:stop()
+    self.player:stop_playhead_poll()
+    self.player:stop()
     self.playhead_position = nil
     self:redraw()
   end
@@ -135,7 +95,7 @@ function SlicePage:enc(n,d)
     self.mode = SlicePageMode.SLICE_SET
     local jump = self.waveform_display.render_duration / self.waveform_display.render_width -- jump approx 1 pixel
     local cursor_offset = jump * d -- neg or pos offset depending on enc turn direction
-    self.cursor_position_time = util.clamp(self.cursor_position_time + cursor_offset, 0.0, self.length)
+    self.cursor_position_time = util.clamp(self.cursor_position_time + cursor_offset, 0.0, self.player.length)
     self.no_slice_selected = true
     self.waveform_display:set_center_and_update(self.cursor_position_time)
   elseif n==3 then
