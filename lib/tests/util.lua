@@ -1,3 +1,5 @@
+-- WARNING: Copied!
+
 --- Utility module
 -- @module lib.util
 

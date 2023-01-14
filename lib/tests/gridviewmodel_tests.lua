@@ -6,7 +6,7 @@ require("test_helper")
 
 luaunit = require("luaunit")
 
-GridViewModel = include("gridviewmodel")
+GridViewModel = include("lib/grid/gridviewmodel")
 
 TestGridViewModel = {}
 

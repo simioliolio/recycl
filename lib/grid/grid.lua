@@ -1,7 +1,7 @@
-GridModel = include 'recycl/gridmodel'
-GridViewModel = include 'recycl/gridviewmodel'
-Sequencer = include 'recycl/sequencer'
-GridEventType = include 'recycl/grideventtype'
+GridModel = include 'recycl/lib/grid/gridmodel'
+GridViewModel = include 'recycl/lib/grid/gridviewmodel'
+Sequencer = include 'recycl/lib/common/sequencer'
+GridEventType = include 'recycl/lib/grid/grideventtype'
 
 Grid = {}
 

@@ -1,8 +1,8 @@
 table = require 'table'
 require("util")
-include("waveformdisplay") -- TODO: Remove?
-include("model")           --
-include("slicepagemode")   --
+include("recycl/lib/slice/waveformdisplay") -- TODO: Remove?
+include("recycl/lib/slice/model")           --
+include("recycl/lib/slice/slicepagemode")   --
 
 SlicePage = {
   debug_mode = false,

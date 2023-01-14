@@ -5,7 +5,7 @@
 require("test_helper")
 
 luaunit = require("luaunit")
-require("waveformdisplay")
+require("lib/slice/waveformdisplay")
 
 TestWaveformDisplay = {}
 

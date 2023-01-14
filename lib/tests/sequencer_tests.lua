@@ -5,7 +5,7 @@
 require("test_helper")
 
 luaunit = require("luaunit")
-require('sequencer')
+require('lib/common/sequencer')
 
 TestSequencer = {}
 

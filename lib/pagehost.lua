@@ -3,15 +3,16 @@
 -- interact with norns to see the menu page)
 
 table = require 'table'
-include("waveformdisplay")
-include("model")
-include("slicepagemode")
-include("sliceplayer")
-Grid = include("grid")
+include("slice/waveformdisplay")
+include("slice/model")
+include("slice/slicepagemode")
+include("common/sliceplayer")
+Grid = include("grid/grid")
+GridSequencerModel = include 'recycl/lib/grid/gridsequencermodel'
 
-MenuPage = include("menupage")
-LoadPage = include("loadpage")
-SlicePage = include("slicepage")
+MenuPage = include("menu/menupage")
+LoadPage = include("load/loadpage")
+SlicePage = include("slice/slicepage")
 
 local all_pages = {MenuPage, LoadPage, SlicePage}
 local page_showing = nil

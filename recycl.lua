@@ -1,12 +1,14 @@
 table = require 'table'
-include("waveformdisplay")
-include("model")
-include("slicepagemode")
-Grid = include("grid")
+include("lib/slice/waveformdisplay")
+include("lib/slice/model")
+include("lib/slice/slicepagemode")
+include("lib/common/sliceplayer")
+Grid = include("lib/grid/grid")
+GridSequencerModel = include 'lib/grid/gridsequencermodel'
 
-MenuPage = include("menupage")
-LoadPage = include("loadpage")
-SlicePage = include("slicepage")
+MenuPage = include("lib/menu/menupage")
+LoadPage = include("lib/load/loadpage")
+SlicePage = include("lib/slice/slicepage")
 
 local all_pages = {MenuPage, LoadPage, SlicePage}
 local pages_via_menu = {LoadPage, SlicePage}

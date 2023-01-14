@@ -5,7 +5,7 @@
 require("test_helper")
 
 luaunit = require("luaunit")
-require("model")
+require("lib/slice/model")
 
 TestModel = {}
 

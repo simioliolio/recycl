@@ -5,9 +5,10 @@
 require("test_helper")
 
 luaunit = require("luaunit")
-GridSequencerModel = require("recycl/gridsequencermodel")
-GridViewModel = require("recycl/gridviewmodel")
-require("recycl/grideventtype")
+GridSequencerModel = require("lib/grid/gridsequencermodel")
+GridViewModel = require("lib/grid/gridviewmodel")
+require("lib/grid/grideventtype")
+require 'common/sequencer'
 
 TestGridSequencerModel = {}
 

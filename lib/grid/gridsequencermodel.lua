@@ -1,6 +1,3 @@
-Sequencer = include 'recycl/sequencer'
-GridViewModel = include("recycl/gridviewmodel")
-
 GridSequencerModel = {}
 
 function GridSequencerModel:new(o)

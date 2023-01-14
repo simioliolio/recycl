@@ -1,8 +1,3 @@
-GridViewModel = include 'recycl/gridviewmodel'
-Sequencer = include 'recycl/sequencer'
-include 'recycl/grideventtype'
-GridSequencerModel = include 'recycl/gridsequencermodel'
-
 GridModel = {}
 
 function GridModel:new(o)
