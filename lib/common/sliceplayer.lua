@@ -9,13 +9,6 @@ SlicePlayer = {
     length = 1
 }
 
-function SlicePlayer:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
-
 function SlicePlayer:setup_softcut()
     softcut.buffer_clear()
     audio.level_adc_cut(1)

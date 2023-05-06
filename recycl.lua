@@ -2,7 +2,6 @@ table = require 'table'
 include("lib/slice/waveformdisplay")
 include("lib/slice/model")
 include("lib/slice/slicepagemode")
-include("lib/common/sliceplayer")
 Grid = include("lib/grid/grid")
 GridSequencerModel = include 'lib/grid/gridsequencermodel'
 

@@ -3,6 +3,7 @@ require("util")
 include("recycl/lib/slice/waveformdisplay") -- TODO: Remove?
 include("recycl/lib/slice/model")           --
 include("recycl/lib/slice/slicepagemode")   --
+SlicePlayer = include("recycl/lib/common/sliceplayer")
 
 SlicePage = {
   debug_mode = false,
@@ -17,7 +18,7 @@ SlicePage = {
   no_slice_selected = true,
   scale = 30, -- TODO: Rename
   redraw_lock = false,
-  player = SlicePlayer:new() -- TODO: 'Inject'
+  player = SlicePlayer
 }
 
 function SlicePage:init()
