@@ -6,7 +6,10 @@ SlicePlayer = {
     on_playhead_poll = function (pos) print("Error! on_playhead_poll not set") end,
 
     -- Length of the loaded audio file
-    length = 1
+    length = 1,
+
+    -- Whether SlicePlayer is playing
+    playing = false
 }
 
 function SlicePlayer:setup_softcut()
@@ -64,10 +67,17 @@ function SlicePlayer:load_file(file)
 end
 
 function SlicePlayer:play(time)
+    self.playing = true
     engine.play(time / self.length)
 end
 
+function SlicePlayer:play_slice(start_time, end_time)
+    self.playing = true
+    engine.play(start_time / self.length, end_time / self.length)
+end
+
 function SlicePlayer:stop()
+    self.playing = false
     engine.stop()
 end
 

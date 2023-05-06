@@ -30,7 +30,7 @@ end
 function GridModel:set_redraw(lambda)
     -- Note: Need to subscribe to advance after receiving update_lambda
     self.update_lambda = lambda
-    Sequencer:subscribe_to_advance(function(current_step) self:did_advance(current_step) end)
+    Sequencer:subscribe_to_event(function(current_step, _) self:did_advance(current_step) end)
 end
 
 function GridModel:clock_tick()

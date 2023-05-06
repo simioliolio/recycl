@@ -53,7 +53,7 @@ function TestSequencer:test_eventCallback_whenAdvance_thenCallsEventCallbackWith
     local event_data_stub = {"data", 1}
     seq:add(1, event_data_stub)
     local event_table_from_callback = nil
-    seq:subscribe_to_event(function(event_table)
+    seq:subscribe_to_event(function(_, event_table)
         event_table_from_callback = event_table
         end
     )
@@ -68,7 +68,7 @@ function TestSequencer:test_eventCallback_whenAdvance_thenCallsEventCallbackWith
     seq:add(1, event_data_stub)
     seq:add(1, event_data_stub_2)
     local events_from_callback = {}
-    seq:subscribe_to_event(function(event_table)
+    seq:subscribe_to_event(function(_, event_table)
         table.insert(events_from_callback, event_table)
         end
     )

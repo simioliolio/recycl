@@ -2,6 +2,7 @@ GridModel = include 'recycl/lib/grid/gridmodel'
 GridViewModel = include 'recycl/lib/grid/gridviewmodel'
 Sequencer = include 'recycl/lib/common/sequencer'
 GridEventType = include 'recycl/lib/grid/grideventtype'
+SlicePlayer = include 'recycl/lib/common/sliceplayer'
 
 Grid = {}
 
@@ -17,7 +18,12 @@ function Grid:new(o)
     clock.transport.stop = function() self:stop_clock() end
     self.model.transport_lambda = function(play)
         local t = clock.transport
-        if play == true then t.start() else t.stop() end
+        if play == true then
+            t.start()
+        else
+            t.stop()
+            SlicePlayer:stop() -- Stop slice if playing
+        end
     end
     self.model:set_redraw(function() self:redraw() end)
     self.model.set_clock_div = function(model_clock_div)

@@ -6,9 +6,9 @@ table = require 'table'
 include("slice/waveformdisplay")
 include("slice/model")
 include("slice/slicepagemode")
-include("common/sliceplayer")
 Grid = include("grid/grid")
 GridSequencerModel = include 'recycl/lib/grid/gridsequencermodel'
+SequencePlayer = include 'recycl/lib/common/sequenceplayer'
 
 MenuPage = include("menu/menupage")
 LoadPage = include("load/loadpage")
@@ -22,6 +22,7 @@ engine.name = "Recycl"
 
 function init()
     setup_pages()
+    SequencePlayer.connect_sequencer_to_slice_player()
 end
 
 function setup_pages()

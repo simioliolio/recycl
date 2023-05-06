@@ -83,7 +83,7 @@ Engine_Recycl : CroneEngine {
 		});
 
 		// `/play [start](0.0->1.0) [end](0.0->1.0)`
-		this.addCommand("play", "f", { arg msg;
+		this.addCommand("play", "ff", { arg msg;
 			var start, end;
 			start = 0.0;
 			end = 1.0;
