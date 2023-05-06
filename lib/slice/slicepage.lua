@@ -1,8 +1,8 @@
 table = require 'table'
 require("util")
 include("recycl/lib/slice/waveformdisplay") -- TODO: Remove?
-include("recycl/lib/slice/model")           --
-include("recycl/lib/slice/slicepagemode")   --
+Model = include("recycl/lib/slice/model")
+include("recycl/lib/slice/slicepagemode")   -- TODO: Remove?
 SlicePlayer = include("recycl/lib/common/sliceplayer")
 
 SlicePage = {
@@ -11,7 +11,7 @@ SlicePage = {
   waveform_loaded = false,
   mode = SlicePageMode.SLICE_SET,
   waveform_display = WaveformDisplay:new(),
-  model = Model:new(),
+  model = Model,
   -- waveform view
   cursor_position_time = 0,
   selected_slice_index = 1,
@@ -37,7 +37,7 @@ function SlicePage:reset()
     {update_data_request = function(start, duration, no_of_values) self.player:render(start, duration, no_of_values) end,
     max_render_duration = self.player.length}
   )
-  self.model = Model:new()
+  self.model:reset()
   self.model.slice_store:set_length(self.player.length)
   self.playhead_position = nil
   -- trigger intial waveform load

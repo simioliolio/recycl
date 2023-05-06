@@ -81,14 +81,12 @@ function SliceStore:closest_slice_index(time)
     return output_index
 end
 
-Model = {}
+Model = {
+    slice_store = SliceStore:new()
+}
 
-function Model:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
+function Model:reset()
     self.slice_store = SliceStore:new()
-    return o
 end
 
 return Model
