@@ -1,17 +1,20 @@
 require('table')
 
-Sequencer = {}
+Sequencer = {
+    current_step = nil,
+    sequence = {}, -- table of tables
+    did_advance = function(current_step) end,
+    sequence_length = 0,
+    event_subscribers = {},
+    advance_subscribers = {}
+}
 
-function Sequencer:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
+function Sequencer:reset()
     self.current_step = nil
-    self.sequence = {} -- table of tables
-    self.event_callback = function(event_table) end
-    self.did_advance = function(current_step) end
+    self.sequence = {}
+    self.event_subscribers = {}
+    self.advance_subscribers = {}
     self.sequence_length = 0
-    return o
 end
 
 function Sequencer:advance()
@@ -27,10 +30,10 @@ function Sequencer:advance()
     local events_at_current_step = self.sequence[self.current_step]
     if events_at_current_step ~= nil then
         for i, event in ipairs(events_at_current_step) do
-            self.event_callback(event)
+            self:send_event_to_subscribers(event)
         end
     end
-    self.did_advance(self.current_step)
+    self:send_advance_to_subscribers(self.current_step)
 end
 
 function Sequencer:add(step, data_table)
@@ -43,6 +46,29 @@ end
 
 function Sequencer:clear(step)
     self.sequence[step] = nil
+end
+
+-- Observer must implement `sequence_event(event)`
+function Sequencer:subscribe_to_event(lambda)
+    table.insert(self.event_subscribers, lambda)
+end
+
+function Sequencer:send_event_to_subscribers(event)
+    for i, lambda in ipairs(self.event_subscribers) do
+        lambda(event)
+    end
+end
+
+-- Observer must implement `sequence_advance(current_step)`
+function Sequencer:subscribe_to_advance(lambda)
+    table.insert(self.advance_subscribers, lambda)
+end
+
+function Sequencer:send_advance_to_subscribers(current_step)
+    if self.advance_subscribers == nil then return end
+    for i, lambda in ipairs(self.advance_subscribers) do
+        lambda(current_step)
+    end
 end
 
 return Sequencer

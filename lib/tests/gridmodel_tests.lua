@@ -13,12 +13,15 @@ require 'common/sequencer'
 
 TestGridModel = {}
 
+function TestGridModel:setUp()
+    Sequencer:reset()
+end
 
 function TestGridModel:test_interaction_thenIsSeqInteraction()
     local sut = GridModel:new()
     sut:interaction(1, 1, 1)
     sut:interaction(1, 1, 0)
-    luaunit.assertEquals(sut.sequencer.sequence[1], {{event_type="start", part=1}})
+    luaunit.assertEquals(Sequencer.sequence[1], {{event_type="start", part=1}})
 end
 
 function TestGridModel:test_interaction_whenOnPressCol1Row8_thenStop()
@@ -64,10 +67,10 @@ function TestGridModel:test_interaction_whenSeqInterOn_whenSwitchMode_whenSeqInt
     sut:interaction(3, 8, 1) -- Change mode
     sut:interaction(1, 1, 0) -- finish extending
     sut:interaction(4, 1, 0)
-    luaunit.assertEquals(sut.sequencer.sequence[1], {{event_type="start", part=1}})
-    luaunit.assertEquals(sut.sequencer.sequence[2], {{event_type="tail", part=1}})
-    luaunit.assertEquals(sut.sequencer.sequence[3], {{event_type="tail", part=1}})
-    luaunit.assertEquals(sut.sequencer.sequence[4], {{event_type="tail", part=1}})
+    luaunit.assertEquals(Sequencer.sequence[1], {{event_type="start", part=1}})
+    luaunit.assertEquals(Sequencer.sequence[2], {{event_type="tail", part=1}})
+    luaunit.assertEquals(Sequencer.sequence[3], {{event_type="tail", part=1}})
+    luaunit.assertEquals(Sequencer.sequence[4], {{event_type="tail", part=1}})
 end
 
 

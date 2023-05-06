@@ -19,7 +19,7 @@ function Grid:new(o)
         local t = clock.transport
         if play == true then t.start() else t.stop() end
     end
-    self.model.update_lambda = function() self:redraw() end
+    self.model:set_redraw(function() self:redraw() end)
     self.model.set_clock_div = function(model_clock_div)
         self.clock_div = model_clock_div
     end

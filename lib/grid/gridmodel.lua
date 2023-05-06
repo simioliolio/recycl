@@ -1,3 +1,5 @@
+Sequencer = include "recycl/lib/common/sequencer"
+
 GridModel = {}
 
 function GridModel:new(o)
@@ -6,13 +8,11 @@ function GridModel:new(o)
     self.__index = self
     self.view = GridViewModel:new()
     self.transport_lambda = function(play) end      -- replace externally
-    self.update_lambda = function() print("error, no update function set") end              -- TODO: Pass on init?
-    self.set_clock_div = function(clock_div) print("error, no clock div function set") end  --
-    self.number_of_parts = 8
-    self.sequence_length = 8
-    self.sequencer = Sequencer:new()
+    self.update_lambda = function() print("error, no update function set") end
+    self.set_clock_div = function(clock_div) print("error, no clock div function set") end
+    self.number_of_parts = 8 -- TODO: Unused
+    self.sequence_length = 8 --
     self.sequencer_model = GridSequencerModel:new( {
-        sequencer = self.sequencer,
         view = self.view
     })
     self.current_held_interations = {{}} -- {x, y, mode}
@@ -23,14 +23,18 @@ function GridModel:new(o)
         CLOCK_DIV = "clock_div",
     }
     self.mode = self.Modes.SEQUENCE
+
     return o
 end
 
+function GridModel:set_redraw(lambda)
+    -- Note: Need to subscribe to advance after receiving update_lambda
+    self.update_lambda = lambda
+    Sequencer:subscribe_to_advance(function(current_step) self:did_advance(current_step) end)
+end
+
 function GridModel:clock_tick()
-    -- Update callback to ensure an externally-set `update_lambda` is used in `did_advance()`
-    -- FIXME: Remove if `update_lambda` is passed on init
-    self.sequencer.did_advance = function(current_step) self:did_advance(current_step) end
-    self.sequencer:advance()
+    Sequencer:advance()
 end
 
 function GridModel:did_advance(current_step)
@@ -79,7 +83,7 @@ end
 function GridModel:stop()
     self.transport_lambda(false)
     self.view.playing = false
-    self.sequencer.current_step = nil
+    Sequencer.current_step = nil
     self.view:update_current_visible_step(nil)
 end
 

@@ -1,5 +1,5 @@
 -- Expose lua files to 'require'
-package.path = package.path .. ";../?.lua" .. ";../../?.lua"
+package.path = package.path .. ";../?.lua" .. ";../../?.lua" .. ";../../../?.lua"
 
 -- 'include' is a norns thing. 'require' is the correct Lua way.
 -- 'require' means restarting norns whenever a change is made (due to the 'module'

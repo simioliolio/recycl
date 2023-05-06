@@ -1,8 +1,9 @@
+Sequencer = include "recycl/lib/common/sequencer"
+
 GridSequencerModel = {}
 
 function GridSequencerModel:new(o)
     o = o or {
-        sequencer = Sequencer:new(),
         view = GridViewModel:new()
     }
     setmetatable(o, self)
@@ -32,7 +33,7 @@ function GridSequencerModel:sequencer_interaction(x, y, z)
             end
         else
             -- Normal mode
-            local existing_at_step = self.sequencer.sequence[sequenced_step]
+            local existing_at_step = Sequencer.sequence[sequenced_step]
             if not existing_at_step then
                 -- No existing event, add event
                 self:clear_note(sequenced_step)
@@ -96,20 +97,20 @@ end
 
 -- Clears a note and tail from a specific step
 function GridSequencerModel:clear_note(step)
-    local existing = self.sequencer.sequence[step]
+    local existing = Sequencer.sequence[step]
     if not existing then return end
     if #existing == 0 then return end
     local first_event = existing[1]
     local part = first_event.part
-    self.sequencer:clear(step)
+    Sequencer:clear(step)
     -- After clearing at the step specified, clear any trailing tail for the same part
     for i = step + 1, step + 16 do -- TODO: Does not need to be 16
-        local future_events = self.sequencer.sequence[i]
+        local future_events = Sequencer.sequence[i]
         if not future_events then return end
         local future_event = future_events[1]
         if future_event.part ~= part then return end
         if future_event.event_type == GridEventType.TAIL then
-            self.sequencer:clear(i)
+            Sequencer:clear(i)
         end
     end
 end
@@ -118,21 +119,21 @@ function GridSequencerModel:add_start_event(step, part)
     local event = {}
     event.event_type = GridEventType.START
     event.part = part
-    self.sequencer:add(step, event)
+    Sequencer:add(step, event)
 end
 
 function GridSequencerModel:add_tail_event(step, part)
     local event = {}
     event.event_type = GridEventType.TAIL
     event.part = part
-    self.sequencer:add(step, event)
+    Sequencer:add(step, event)
 end
 
 -- Convert raw sequence data to view sequence data
 function GridSequencerModel:update_view_seq()
     self.view:init_sequence_data() -- init to blank 16x7 'matrix'
     for sequenced_step = self.view.first_visible_step, self.view.max_visible_sequence_length do
-        local events_for_step = self.sequencer.sequence[sequenced_step]
+        local events_for_step = Sequencer.sequence[sequenced_step]
         if events_for_step == nil then
             goto continue
         end
