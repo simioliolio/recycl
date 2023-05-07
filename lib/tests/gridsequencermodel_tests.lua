@@ -7,6 +7,7 @@ require("test_helper")
 luaunit = require("luaunit")
 GridSequencerModel = require("lib/grid/gridsequencermodel")
 GridViewModel = require("lib/grid/gridviewmodel")
+ParamID = require 'lib/common/paramid'
 require("lib/grid/grideventtype")
 require 'common/sequencer'
 
@@ -14,6 +15,7 @@ TestGridSequencerModel = {}
 
 function TestGridSequencerModel:setUp()
     Sequencer:reset()
+    params.get = function(self, id) return 8 end
 end
 
 function TestGridSequencerModel:test_seqInter_whenAddOverTail_thenReplaceTail_thenRemoveOrphanTail()
@@ -231,5 +233,19 @@ function TestGridSequencerModel:test_seqInter_whenExistingStartEvents_whenAddNew
     luaunit.assertEquals(Sequencer.sequence[4], nil)
 end
 
+function TestGridSequencerModel:test_seqInter_whenStepBeyondSeqLen_thenGrowsSeqLen()
+    local sut = GridSequencerModel:new()
+    -- emulate params behaviour
+    params.get = function(self, id) return 1 end
+    local set_step = nil
+    params.set = function(self, id, data, action)
+        if id == ParamID.seq_length then
+            set_step = data
+        end
+    end
+    sut:sequencer_interaction(2, 1, 1) -- Add event
+    sut:sequencer_interaction(2, 1, 0)
+    luaunit.assertEquals(set_step, 2)
+end
 
 os.exit( luaunit.LuaUnit.run() )

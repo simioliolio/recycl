@@ -1,3 +1,5 @@
+ParamID = include 'recycl/lib/common/paramid'
+
 SlicePlayer = {
     -- Called after request to update content
     on_render = function (ch, start, i, s) print("Error! on_render not set") end,
@@ -31,6 +33,12 @@ function SlicePlayer:reset()
         softcut.rate(i,1.0)
         -- softcut.fade_time(1,0) -- TODO: Remove?
     end
+end
+
+function SlicePlayer:connect_params()
+    params:set_action(ParamID.playback_pitch, function(val)
+        engine.rate(val)
+    end)
 end
 
 function SlicePlayer:register_playhead_poll()

@@ -1,4 +1,5 @@
 Sequencer = include "recycl/lib/common/sequencer"
+ParamID = include 'recycl/lib/common/paramid'
 
 GridSequencerModel = {}
 
@@ -120,6 +121,7 @@ function GridSequencerModel:add_start_event(step, part)
     event.event_type = GridEventType.START
     event.part = part
     Sequencer:add(step, event)
+    self:accomodate_step(step)
 end
 
 function GridSequencerModel:add_tail_event(step, part)
@@ -127,6 +129,15 @@ function GridSequencerModel:add_tail_event(step, part)
     event.event_type = GridEventType.TAIL
     event.part = part
     Sequencer:add(step, event)
+    self:accomodate_step(step)
+end
+
+function GridSequencerModel:accomodate_step(step)
+    -- grow the sequence length to accommodate
+    local sequence_length = params:get(ParamID.seq_length)
+    if step > sequence_length then
+        params:set(ParamID.seq_length, step, false)
+    end
 end
 
 -- Convert raw sequence data to view sequence data

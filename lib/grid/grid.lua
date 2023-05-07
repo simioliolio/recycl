@@ -3,6 +3,7 @@ GridViewModel = include 'recycl/lib/grid/gridviewmodel'
 Sequencer = include 'recycl/lib/common/sequencer'
 GridEventType = include 'recycl/lib/grid/grideventtype'
 SlicePlayer = include 'recycl/lib/common/sliceplayer'
+ParamID = include 'recycl/lib/common/paramid'
 
 Grid = {}
 
@@ -10,12 +11,17 @@ function Grid:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
-    -- self.clock = o.clock
-    -- if not self.clock then error("no clock passed to Grid") end
-    self.clock_div = 2
-    self.model = GridModel:new()
+
+    self.clock_div = params:get(ParamID.clock_div)
+    params:set_action(ParamID.clock_div, function(val)
+        print("getting clock div " .. val)
+        self.clock_div = val
+    end)
+
     clock.transport.start = function() self:start_clock() end
     clock.transport.stop = function() self:stop_clock() end
+
+    self.model = GridModel:new()
     self.model.transport_lambda = function(play)
         local t = clock.transport
         if play == true then

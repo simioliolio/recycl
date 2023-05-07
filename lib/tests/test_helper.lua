@@ -9,3 +9,9 @@ package.path = package.path .. ";../?.lua" .. ";../../?.lua" .. ";../../../?.lua
 function include(file)
     return require(file)
 end
+
+-- Fakes
+params = {
+    get = function(self, a) end,
+    set = function(self, a, b, c) end
+}

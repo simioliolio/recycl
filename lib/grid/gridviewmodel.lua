@@ -10,7 +10,6 @@ function GridViewModel:new(o)
     self.clock_div_set_enabled = false
     self.clock_div = 1 -- (1...7)
     self.mlr_goto_set_enabled = false
-    self.sequence_length_set_enabled = false
     self.first_visible_step = 1     -- changes with horizonal scroll
     self.first_visible_part = 1     -- changes with vertical scroll
     self.max_visible_sequence_length = 16 -- grid width typically 16

@@ -26,6 +26,7 @@ function SlicePage:init()
   self.player.on_playhead_poll = function (pos) self:on_playhead_poll(pos) end
   self.player:register_playhead_poll()
   self.player:setup_softcut()
+  self.player:connect_params()
   self:reset()
   if self.debug_mode then self:load_file("/home/we/dust/audio/tehn/drumev.wav") end
 end

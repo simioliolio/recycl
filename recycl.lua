@@ -5,6 +5,8 @@ include("lib/slice/slicepagemode")
 Grid = include("lib/grid/grid")
 GridSequencerModel = include 'lib/grid/gridsequencermodel'
 SequencePlayer = include 'lib/common/sequenceplayer'
+ParamReg = include 'recycl/lib/common/paramreg'
+SequencerParams = include 'recycl/lib/common/sequencerparams'
 
 MenuPage = include("lib/menu/menupage")
 LoadPage = include("lib/load/loadpage")
@@ -17,9 +19,11 @@ local page_showing = nil
 engine.name = "Recycl"
 
 function init()
+    ParamReg:addAll()
     grid_base = Grid:new({})
     setup_pages()
     SequencePlayer.connect_sequencer_to_slice_player()
+    SequencerParams.connect()
     SlicePage:init()
 end
 

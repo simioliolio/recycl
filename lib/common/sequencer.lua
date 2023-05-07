@@ -4,7 +4,7 @@ Sequencer = {
     current_step = nil,
     sequence = {}, -- table of tables
     did_advance = function(current_step) end,
-    sequence_length = 0,
+    sequence_length = 0, -- Dev note: Use ParamID.sequence_length param
     event_subscribers = {},
     advance_subscribers = {}
 }
@@ -41,8 +41,6 @@ function Sequencer:add(step, data_table)
     local step_data = self.sequence[step] or {}
     table.insert(step_data, data_table)
     self.sequence[step] = step_data
-    -- grow the sequence length to accommodate
-    if step > self.sequence_length then self.sequence_length = step end
 end
 
 function Sequencer:clear(step)

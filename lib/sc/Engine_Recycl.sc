@@ -3,6 +3,7 @@ Engine_Recycl : CroneEngine {
 
 	var <gatedPlayer;
 	var <posControl;
+	var <rate = 1.0;
 
 	*new { arg context, doneCallback;
 		^super.new(context, doneCallback);
@@ -99,12 +100,19 @@ Engine_Recycl : CroneEngine {
 			gatedPlayer = Synth("GatedPlayer",
 							[\out, context.out_b, \bufnum, ~buffer, \pos_out, posControl.index],
 							context.xg);
-			gatedPlayer.set(\t_trig, 1, \gate, 1, \start, start, \end, end);
+			gatedPlayer.set(\t_trig, 1, \gate, 1, \rate, rate, \start, start, \end, end);
 		});
 
 		this.addCommand("stop", "", { arg msg;
 			if (gatedPlayer.notNil) {
 				gatedPlayer.set(\gate, 0)
+			}
+		});
+
+		this.addCommand("rate", "f", { arg msg;
+			rate = msg[1];
+			if (gatedPlayer.notNil) {
+				gatedPlayer.set(\rate, rate)
 			}
 		});
 
