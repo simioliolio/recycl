@@ -14,9 +14,9 @@ SlicePlayer = {
 
 function SlicePlayer:setup_softcut()
     softcut.buffer_clear()
-    audio.level_adc_cut(1)
-    softcut.level_input_cut(1,2,1.0)
-    softcut.level_input_cut(2,2,1.0)
+    -- audio.level_adc_cut(1) -- TODO: Remove?
+    -- softcut.level_input_cut(1,2,1.0)
+    -- softcut.level_input_cut(2,2,1.0)
     softcut.phase_quant(1,0.01)
     softcut.poll_start_phase()
     softcut.event_render(self.on_render) -- TODO: Move up?
@@ -29,7 +29,7 @@ function SlicePlayer:reset()
         softcut.level(1,1.0)
         softcut.position(i,0)
         softcut.rate(i,1.0)
-        softcut.fade_time(1,0)
+        -- softcut.fade_time(1,0) -- TODO: Remove?
     end
 end
 
