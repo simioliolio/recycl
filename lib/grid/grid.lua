@@ -4,6 +4,7 @@ Sequencer = include 'recycl/lib/common/sequencer'
 GridEventType = include 'recycl/lib/grid/grideventtype'
 SlicePlayer = include 'recycl/lib/common/sliceplayer'
 ParamID = include 'recycl/lib/common/paramid'
+OnScreenGrid = include 'recycl/lib/grid/onscreengrid'
 
 Grid = {}
 
@@ -36,10 +37,8 @@ function Grid:new(o)
         self.clock_div = model_clock_div
     end
 
-    self.g = grid.connect()
-    self.g.key = function(x, y, z)
-        self:interaction(x, y, z)
-    end
+    OnScreenGrid:init()
+    OnScreenGrid:subscribe_to_keys(function(x, y, z) self:interaction(x, y, z) end)
 
     self:redraw()
 end
@@ -67,31 +66,31 @@ function Grid:interaction(x, y, z)
 end
 
 function Grid:redraw()
-    self.g:all(0)
+    OnScreenGrid:all(0)
     -- sequence
     for step_number, step in ipairs(self.model.view.sequence_data) do
         for part, event_type in ipairs(step) do
             if event_type == GridEventType.START then
-                self.g:led(step_number, part, 15)
+                OnScreenGrid:led(step_number, part, 15)
             elseif event_type == GridEventType.TAIL then
-                self.g:led(step_number, part, 10)
+                OnScreenGrid:led(step_number, part, 10)
             end
         end
     end
     -- sequence playhead
     local playhead = self.model.view.current_visible_step
     if playhead ~= nil then
-        for i = 1, 7 do self.g:led(playhead, i, 1) end
+        for i = 1, 7 do OnScreenGrid:led(playhead, i, 1) end
     end
     -- transport
     if self.model.view.playing then
-        self.g:led(1, 8, 0)
-        self.g:led(2, 8, 15)
+        OnScreenGrid:led(1, 8, 0)
+        OnScreenGrid:led(2, 8, 15)
     else
-        self.g:led(1, 8, 15)
-        self.g:led(2, 8, 0)
+        OnScreenGrid:led(1, 8, 15)
+        OnScreenGrid:led(2, 8, 0)
     end
-    self.g:refresh()
+    OnScreenGrid:refresh()
 end
 
 return Grid

@@ -15,8 +15,9 @@ SequencerParams = include 'recycl/lib/common/sequencerparams'
 MenuPage = include("menu/menupage")
 LoadPage = include("load/loadpage")
 SlicePage = include("slice/slicepage")
+GridPage = include("grid/gridpage")
 
-local all_pages = {MenuPage, LoadPage, SlicePage}
+local all_pages = {MenuPage, LoadPage, SlicePage, GridPage}
 local page_showing = nil
 
 engine.name = "Recycl"
@@ -44,7 +45,10 @@ function setup_pages()
 
     SlicePage.debug_mode = true -- TODO: Pass in init
     SlicePage:init()
-    show_page(SlicePage)
+
+    GridPage:init()
+
+    show_page(GridPage)
 end
 
 function show_page(page_to_show)
