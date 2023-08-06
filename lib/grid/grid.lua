@@ -1,7 +1,7 @@
 GridModel = include 'recycl/lib/grid/gridmodel'
 GridViewModel = include 'recycl/lib/grid/gridviewmodel'
 Sequencer = include 'recycl/lib/common/sequencer'
-GridEventType = include 'recycl/lib/grid/grideventtype'
+SequenceEventType = include 'recycl/lib/common/sequenceeventtype'
 SlicePlayer = include 'recycl/lib/common/sliceplayer'
 ParamID = include 'recycl/lib/common/paramid'
 OnScreenGrid = include 'recycl/lib/grid/onscreengrid'
@@ -70,9 +70,9 @@ function Grid:redraw()
     -- sequence
     for step_number, step in ipairs(self.model.view.sequence_data) do
         for part, event_type in ipairs(step) do
-            if event_type == GridEventType.START then
+            if event_type == SequenceEventType.START then
                 OnScreenGrid:led(step_number, part, 15)
-            elseif event_type == GridEventType.TAIL then
+            elseif event_type == SequenceEventType.TAIL then
                 OnScreenGrid:led(step_number, part, 10)
             end
         end

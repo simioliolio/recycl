@@ -42,7 +42,7 @@ function GridSequencerModel:sequencer_interaction(x, y, z)
             else
                 if #existing_at_step ~= 1 then print("!! duplicate events found at a single step when trying to work with mono sequence !!") return end
                 local existing_event = existing_at_step[1]
-                if existing_event.event_type == GridEventType.START then
+                if existing_event.event_type == SequenceEventType.START then
 
                     if part ~= existing_event.part then
                         -- Part is different. Kill the existing and replace.
@@ -61,7 +61,7 @@ function GridSequencerModel:sequencer_interaction(x, y, z)
                             table.insert(self.on_presses_for_edited_part, on_press)
                         end
                     end
-                elseif existing_event.event_type == GridEventType.TAIL then
+                elseif existing_event.event_type == SequenceEventType.TAIL then
                     self:clear_note(sequenced_step)
                     self:add_start_event(sequenced_step, part)
                 end
@@ -110,7 +110,7 @@ function GridSequencerModel:clear_note(step)
         if not future_events then return end
         local future_event = future_events[1]
         if future_event.part ~= part then return end
-        if future_event.event_type == GridEventType.TAIL then
+        if future_event.event_type == SequenceEventType.TAIL then
             Sequencer:clear(i)
         end
     end
@@ -118,7 +118,7 @@ end
 
 function GridSequencerModel:add_start_event(step, part)
     local event = {}
-    event.event_type = GridEventType.START
+    event.event_type = SequenceEventType.START
     event.part = part
     Sequencer:add(step, event)
     self:accomodate_step(step)
@@ -126,7 +126,7 @@ end
 
 function GridSequencerModel:add_tail_event(step, part)
     local event = {}
-    event.event_type = GridEventType.TAIL
+    event.event_type = SequenceEventType.TAIL
     event.part = part
     Sequencer:add(step, event)
     self:accomodate_step(step)

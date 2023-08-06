@@ -1,6 +1,6 @@
 Sequencer = include 'recycl/lib/common/sequencer'
 SlicePlayer = include 'recycl/lib/common/sliceplayer'
-GridEventType = include 'recycl/lib/grid/grideventtype'
+SequenceEventType = include 'recycl/lib/common/sequenceeventtype'
 Model = include 'recycl/lib/slice/model'
 
 SequencePlayer = {
@@ -13,7 +13,7 @@ function SequencePlayer.connect_sequencer_to_slice_player()
         if event == nil and SlicePlayer.playing == true then
             SlicePlayer:stop()
         elseif event ~= nil then
-            if event.event_type == GridEventType.START then
+            if event.event_type == SequenceEventType.START then
                 if #Model.slice_store.slice_times <= event.part then
                     print("error: sequencer requesting slice that doesn't exist")
                     return

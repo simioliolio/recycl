@@ -8,7 +8,7 @@ luaunit = require("luaunit")
 GridSequencerModel = require("lib/grid/gridsequencermodel")
 GridViewModel = require("lib/grid/gridviewmodel")
 ParamID = require 'lib/common/paramid'
-require("lib/grid/grideventtype")
+require 'common/sequenceeventtype'
 require 'common/sequencer'
 
 TestGridSequencerModel = {}
@@ -22,10 +22,10 @@ function TestGridSequencerModel:test_seqInter_whenAddOverTail_thenReplaceTail_th
     local sut = GridSequencerModel:new()
 
     local start_stub = {}
-    start_stub.event_type = GridEventType.START
+    start_stub.event_type = SequenceEventType.START
     start_stub.part = 1
     local tail_stub = {}
-    tail_stub.event_type = GridEventType.TAIL
+    tail_stub.event_type = SequenceEventType.TAIL
     tail_stub.part = 1
     Sequencer.sequence[1] = {start_stub}
     Sequencer.sequence[2] = {tail_stub}
@@ -48,7 +48,7 @@ end
 function TestGridSequencerModel:test_seqInter_whenExisting_whenPressingExistingStart_thenRemove()
     local sut = GridSequencerModel:new()
     local start_stub = {}
-    start_stub.event_type = GridEventType.START
+    start_stub.event_type = SequenceEventType.START
     start_stub.part = 1
     Sequencer.sequence[1] = {start_stub}
     sut:sequencer_interaction(1, 1, 1)
@@ -59,7 +59,7 @@ end
 function TestGridSequencerModel:test_seqInter_whenExisting_whenPressingAnotherPartAtSameStep_thenReplace()
     local sut = GridSequencerModel:new()
     local start_stub = {}
-    start_stub.event_type = GridEventType.START
+    start_stub.event_type = SequenceEventType.START
     start_stub.part = 1
     Sequencer.sequence[1] = {start_stub}
     sut:sequencer_interaction(1, 2, 1)
@@ -82,10 +82,10 @@ end
 function TestGridSequencerModel:test_seqInter_whenLongNote_whenNoteOnOtherPart_thenReplaces()
     local sut = GridSequencerModel:new()
     local start_stub = {}
-    start_stub.event_type = GridEventType.START
+    start_stub.event_type = SequenceEventType.START
     start_stub.part = 1
     local tail_stub = {}
-    tail_stub.event_type = GridEventType.TAIL
+    tail_stub.event_type = SequenceEventType.TAIL
     tail_stub.part = 1
     Sequencer.sequence[1] = {start_stub}
     Sequencer.sequence[2] = {tail_stub}
@@ -99,10 +99,10 @@ end
 function TestGridSequencerModel:test_seqInter_whenLongNote_whenNoteOnOtherPartDuringTail_thenReplacesTail()
     local sut = GridSequencerModel:new()
     local start_stub = {}
-    start_stub.event_type = GridEventType.START
+    start_stub.event_type = SequenceEventType.START
     start_stub.part = 1
     local tail_stub = {}
-    tail_stub.event_type = GridEventType.TAIL
+    tail_stub.event_type = SequenceEventType.TAIL
     tail_stub.part = 1
     Sequencer.sequence[1] = {start_stub}
     Sequencer.sequence[2] = {tail_stub}

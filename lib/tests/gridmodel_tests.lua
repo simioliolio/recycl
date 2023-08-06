@@ -7,7 +7,7 @@ require("test_helper")
 luaunit = require("luaunit")
 GridModel = require("grid/gridmodel")
 GridViewModel = require("grid/gridviewmodel")
-require 'grid/grideventtype'
+require 'common/sequenceeventtype'
 require 'grid/gridsequencermodel'
 require 'common/sequencer'
 
